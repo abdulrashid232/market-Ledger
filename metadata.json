@@ -1,0 +1,8 @@
+{
+  "name": "Market Vendor Daily Ledger",
+  "description": "AI-powered daily ledger converting raw, unstructured vendor notes into structured revenue summaries, inventory checklists, customer feedback analysis, and actionable business insights.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
