@@ -50,7 +50,7 @@ export default function App() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to process notes with Gemini API.');
+        throw new Error(data.error || 'Failed to process notes with local Gemma 4.');
       }
 
       const parsed = data.data;
@@ -211,7 +211,7 @@ export default function App() {
           <div className="flex items-center space-x-2">
             <Store className="w-4 h-4 text-amber-700" />
             <span className="font-bold text-stone-800">Market Vendor Daily Ledger</span>
-            <span>• Powered by Gemma / Gemini 3.6 Flash</span>
+            <span>• Powered by Gemma 4 (Local AI)</span>
           </div>
           <p className="text-stone-400">
             Empowering small local business owners and market vendors with instant bookkeeping.

@@ -51,7 +51,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
   const [dictationNotice, setDictationNotice] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
 
-  // Gemini AI Audio Recording state
+  // Audio Recording state
   const [isRecordingAudio, setIsRecordingAudio] = useState<boolean>(false);
   const [recordingSeconds, setRecordingSeconds] = useState<number>(0);
   const [isTranscribingAudio, setIsTranscribingAudio] = useState<boolean>(false);
@@ -159,7 +159,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
     }
   };
 
-  // Start Gemini Multilingual Audio Recording
+  // Start Multilingual Audio Recording
   const startAudioRecording = async () => {
     setDictationNotice(null);
     try {
@@ -198,7 +198,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
     }
   };
 
-  // Stop Audio Recording & Send to Gemini for Multilingual Transcription/Translation
+  // Stop Audio Recording & Send for Multilingual Transcription/Translation
   const stopAudioRecording = () => {
     if (mediaRecorderRef.current && isRecordingAudio) {
       clearInterval(timerIntervalRef.current);
@@ -273,7 +273,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
             Enter Raw End-of-Day Vendor Notes
           </h2>
           <p className="text-sm text-stone-600 mt-1">
-            Dictate in native <strong>Twi, Hausa, Dagbani, Ghanaian Pidgin, or English</strong>. Gemma / Gemini AI translates and structures your notes into neat sales, inventory, and profit reports.
+            Dictate in native <strong>Twi, Hausa, Dagbani, Ghanaian Pidgin, or English</strong>. Gemma 4 AI structures your notes into neat sales, inventory, and profit reports.
           </p>
         </div>
 
@@ -352,7 +352,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
         {/* Dictation Action Controls */}
         <div className="flex flex-wrap items-center gap-2">
           
-          {/* Gemini AI Audio Recorder (Primary, works everywhere with microphone) */}
+          {/* AI Audio Recorder (Primary, works everywhere with microphone) */}
           {!isRecordingAudio ? (
             <button
               type="button"
@@ -398,7 +398,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
         <div className="mb-4 p-3 bg-amber-100/90 border border-amber-300 rounded-xl text-xs font-bold text-amber-950 flex items-center space-x-2 animate-pulse">
           <Loader2 className="w-4 h-4 text-amber-800 animate-spin" />
           <span>
-            Gemma / Gemini is transcribing & translating your spoken <strong>{selectedLang.toUpperCase()}</strong> recording into clear English vendor notes...
+            Transcribing & translating your spoken <strong>{selectedLang.toUpperCase()}</strong> recording into clear English vendor notes...
           </span>
         </div>
       )}
@@ -455,7 +455,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
             <div className="flex items-center justify-between">
               <span className="font-bold text-sm flex items-center gap-2">
                 <Loader2 className="w-4 h-4 text-amber-700 animate-spin" />
-                Gemma / Gemini is structuring your daily notes...
+                Gemma 4 is structuring your daily notes...
               </span>
               <span className="text-xs font-semibold text-amber-800 bg-amber-200/80 px-2 py-0.5 rounded-full">
                 Step {analysisStep} of 4
@@ -486,7 +486,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
         {/* Submit Action */}
         <div className="mt-4 flex items-center justify-between">
           <p className="text-xs text-stone-500">
-            * Multilingual voice dictation powered by Gemini 3.6 Flash multimodal audio processing.
+            * Multilingual voice dictation powered by Gemma 4 local AI.
           </p>
 
           <button

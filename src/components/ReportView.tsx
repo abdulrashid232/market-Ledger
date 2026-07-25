@@ -597,7 +597,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
               Actionable Business Advice & Growth Tips
             </h3>
             <p className="text-xs text-stone-600 mt-1">
-              Gemma / Gemini tailored recommendations to increase sales, reduce waste, and negotiate supplier deals.
+              Gemma 4 tailored recommendations to increase sales, reduce waste, and negotiate supplier deals.
             </p>
           </div>
 

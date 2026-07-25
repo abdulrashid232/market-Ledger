@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GoogleGenAI, Type, Modality } from '@google/genai';
+import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 
@@ -15,19 +15,13 @@ const PORT = 3000;
 
 app.use(express.json({ limit: '10mb' }));
 
-// Helper to get GoogleGenAI client lazily
-function getGenAIClient(): GoogleGenAI {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured in process.env');
-  }
-  return new GoogleGenAI({
-    apiKey,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-      },
-    },
+const LM_STUDIO_BASE_URL = process.env.LM_STUDIO_BASE_URL || 'http://127.0.0.1:1234/v1';
+const LM_STUDIO_MODEL = process.env.LM_STUDIO_MODEL || 'google/gemma-4-e2b';
+
+function getLMStudioClient(): OpenAI {
+  return new OpenAI({
+    baseURL: LM_STUDIO_BASE_URL,
+    apiKey: 'lm-studio', // LM Studio does not require a real API key
   });
 }
 
@@ -45,7 +39,7 @@ app.post('/api/analyze-ledger', async (req, res) => {
       return res.status(400).json({ error: 'Vendor notes text is required' });
     }
 
-    const ai = getGenAIClient();
+    const client = getLMStudioClient();
 
     const systemInstruction = `You are an expert market vendor business consultant, financial analyst, and bookkeeper specializing in informal market commerce (e.g. West African, East African, and local community marketplaces).
 Your task is to take raw, messy, unstructured end-of-day notes written or spoken by a vendor and transform them into a precise, mathematically consistent, structured daily report.
@@ -67,247 +61,151 @@ CRITICAL RULES:
 7. Generate Tomorrow's Actionable To-Do List:
    - Priority items to execute first thing tomorrow morning.
 
-Be realistic, practical, and highly empathetic to market vendors.`;
+Be realistic, practical, and highly empathetic to market vendors.
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: `Raw Vendor Notes:\n"""\n${notes}\n"""`,
-      config: {
-        systemInstruction,
-        temperature: 0.2,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            summaryHeadline: {
-              type: Type.STRING,
-              description: "A clear, encouraging 1-2 sentence executive summary of today's business performance."
-            },
-            totalRevenue: {
-              type: Type.NUMBER,
-              description: "Total revenue calculated from sales in numerical format."
-            },
-            totalExpenses: {
-              type: Type.NUMBER,
-              description: "Total expenses calculated in numerical format."
-            },
-            netProfit: {
-              type: Type.NUMBER,
-              description: "Net profit calculated as totalRevenue - totalExpenses."
-            },
-            sales: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  itemName: { type: Type.STRING },
-                  quantitySold: { type: Type.NUMBER },
-                  unitPrice: { type: Type.NUMBER },
-                  totalRevenue: { type: Type.NUMBER },
-                  category: {
-                    type: Type.STRING,
-                    description: "One of: Produce, Grains & Staple, Meat & Fish, Oils & Spices, Textiles & Apparel, General Goods, Services, Other"
+Respond ONLY with a valid JSON object matching this exact structure:
+{
+  "summaryHeadline": "string",
+  "totalRevenue": number,
+  "totalExpenses": number,
+  "netProfit": number,
+  "sales": [{ "itemName": "string", "quantitySold": number, "unitPrice": number, "totalRevenue": number, "category": "string", "notes": "string" }],
+  "expenses": [{ "description": "string", "cost": number, "category": "string", "notes": "string" }],
+  "inventory": [{ "itemName": "string", "status": "in_stock|low_stock|restock_needed|spoiled_damaged", "estimatedRemaining": "string", "restockQuantityNeeded": "string", "notes": "string" }],
+  "feedback": [{ "customerComment": "string", "category": "complaint|praise|inquiry|price_concern", "severity": "low|medium|high", "suggestedAction": "string" }],
+  "insights": [{ "title": "string", "description": "string", "category": "pricing|inventory|customer_service|operations|supplier", "impact": "high|medium|low" }],
+  "tasks": [{ "task": "string", "priority": "high|medium|low" }]
+}`;
+
+    const response = await client.chat.completions.create({
+      model: LM_STUDIO_MODEL,
+      messages: [
+        { role: 'system', content: systemInstruction },
+        { role: 'user', content: `Raw Vendor Notes:\n"""\n${notes}\n"""` },
+      ],
+      temperature: 0.2,
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'ledger_report',
+          strict: true,
+          schema: {
+            type: 'object',
+            properties: {
+              summaryHeadline: { type: 'string' },
+              totalRevenue: { type: 'number' },
+              totalExpenses: { type: 'number' },
+              netProfit: { type: 'number' },
+              sales: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    itemName: { type: 'string' },
+                    quantitySold: { type: 'number' },
+                    unitPrice: { type: 'number' },
+                    totalRevenue: { type: 'number' },
+                    category: { type: 'string' },
+                    notes: { type: 'string' },
                   },
-                  notes: { type: Type.STRING }
+                  required: ['itemName', 'totalRevenue'],
                 },
-                required: ["itemName", "totalRevenue"]
-              }
-            },
-            expenses: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  description: { type: Type.STRING },
-                  cost: { type: Type.NUMBER },
-                  category: {
-                    type: Type.STRING,
-                    description: "One of: Transport & Freight, Restock / Wholesale, Market Toll & Fees, Packaging & Bags, Personal & Food, Utilities & Airtime, Other"
+              },
+              expenses: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    description: { type: 'string' },
+                    cost: { type: 'number' },
+                    category: { type: 'string' },
+                    notes: { type: 'string' },
                   },
-                  notes: { type: Type.STRING }
+                  required: ['description', 'cost'],
                 },
-                required: ["description", "cost"]
-              }
-            },
-            inventory: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  itemName: { type: Type.STRING },
-                  status: {
-                    type: Type.STRING,
-                    description: "One of: in_stock, low_stock, restock_needed, spoiled_damaged"
+              },
+              inventory: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    itemName: { type: 'string' },
+                    status: { type: 'string', enum: ['in_stock', 'low_stock', 'restock_needed', 'spoiled_damaged'] },
+                    estimatedRemaining: { type: 'string' },
+                    restockQuantityNeeded: { type: 'string' },
+                    notes: { type: 'string' },
                   },
-                  estimatedRemaining: { type: Type.STRING },
-                  restockQuantityNeeded: { type: Type.STRING },
-                  notes: { type: Type.STRING }
+                  required: ['itemName', 'status'],
                 },
-                required: ["itemName", "status"]
-              }
-            },
-            feedback: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  customerComment: { type: Type.STRING },
-                  category: {
-                    type: Type.STRING,
-                    description: "One of: complaint, praise, inquiry, price_concern"
+              },
+              feedback: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    customerComment: { type: 'string' },
+                    category: { type: 'string', enum: ['complaint', 'praise', 'inquiry', 'price_concern'] },
+                    severity: { type: 'string', enum: ['low', 'medium', 'high'] },
+                    suggestedAction: { type: 'string' },
                   },
-                  severity: {
-                    type: Type.STRING,
-                    description: "One of: low, medium, high"
+                  required: ['customerComment', 'category', 'suggestedAction'],
+                },
+              },
+              insights: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    title: { type: 'string' },
+                    description: { type: 'string' },
+                    category: { type: 'string', enum: ['pricing', 'inventory', 'customer_service', 'operations', 'supplier'] },
+                    impact: { type: 'string', enum: ['high', 'medium', 'low'] },
                   },
-                  suggestedAction: { type: Type.STRING }
+                  required: ['title', 'description', 'category', 'impact'],
                 },
-                required: ["customerComment", "category", "suggestedAction"]
-              }
-            },
-            insights: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  title: { type: Type.STRING },
-                  description: { type: Type.STRING },
-                  category: {
-                    type: Type.STRING,
-                    description: "One of: pricing, inventory, customer_service, operations, supplier"
+              },
+              tasks: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    task: { type: 'string' },
+                    priority: { type: 'string', enum: ['high', 'medium', 'low'] },
                   },
-                  impact: {
-                    type: Type.STRING,
-                    description: "One of: high, medium, low"
-                  }
+                  required: ['task', 'priority'],
                 },
-                required: ["title", "description", "category", "impact"]
-              }
+              },
             },
-            tasks: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  task: { type: Type.STRING },
-                  priority: {
-                    type: Type.STRING,
-                    description: "One of: high, medium, low"
-                  }
-                },
-                required: ["task", "priority"]
-              }
-            }
+            required: ['summaryHeadline', 'totalRevenue', 'totalExpenses', 'netProfit', 'sales', 'expenses', 'inventory', 'feedback', 'insights', 'tasks'],
           },
-          required: [
-            "summaryHeadline",
-            "totalRevenue",
-            "totalExpenses",
-            "netProfit",
-            "sales",
-            "expenses",
-            "inventory",
-            "feedback",
-            "insights",
-            "tasks"
-          ]
-        }
-      }
+        },
+      } as any,
     });
 
-    const parsedData = JSON.parse(response.text || '{}');
+    const content = response.choices[0]?.message?.content || '{}';
+    const parsedData = JSON.parse(content);
     return res.json({ success: true, data: parsedData });
   } catch (error: any) {
     console.error('Error analyzing ledger notes:', error);
     return res.status(500).json({
       success: false,
-      error: error.message || 'Failed to process vendor notes with Gemini API.'
+      error: error.message || 'Failed to process vendor notes with local LM Studio.',
     });
   }
 });
 
-// API Route: Generate Text-to-Speech audio summary for vendor debrief
-app.post('/api/generate-audio-summary', async (req, res) => {
-  try {
-    const { textPrompt } = req.body;
-    if (!textPrompt) {
-      return res.status(400).json({ error: 'Text prompt is required for audio generation' });
-    }
-
-    const ai = getGenAIClient();
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.1-flash-tts-preview',
-      contents: [{ parts: [{ text: `Say warmly and clearly in a helpful business assistant voice: ${textPrompt}` }] }],
-      config: {
-        responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Kore' }
-          }
-        }
-      }
-    });
-
-    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!base64Audio) {
-      return res.status(500).json({ error: 'Audio generation produced empty output' });
-    }
-
-    res.json({ success: true, audioBase64: base64Audio });
-  } catch (error: any) {
-    console.error('Error generating audio summary:', error);
-    res.status(500).json({ error: error.message || 'Failed to generate audio summary' });
-  }
+// Audio generation is not supported with a local Gemma 4 text model
+app.post('/api/generate-audio-summary', (req, res) => {
+  res.status(501).json({
+    error: 'Audio generation (TTS) is not supported with the local Gemma 4 model. This feature requires a cloud TTS service.',
+  });
 });
 
-// API Route: Transcribe & Translate Multilingual Audio (Twi, Hausa, Dagbani, English, Pidgin)
-app.post('/api/transcribe-audio', async (req, res) => {
-  try {
-    const { audioBase64, mimeType = 'audio/webm', language = 'auto' } = req.body;
-    if (!audioBase64) {
-      return res.status(400).json({ error: 'Audio recording base64 data is required' });
-    }
-
-    const ai = getGenAIClient();
-
-    let langHint = 'The audio may be spoken in Twi (Akan), Hausa, Dagbani, Ghanaian Pidgin, or English.';
-    if (language === 'twi') {
-      langHint = 'The audio is spoken in native Twi (Akan). Listen closely to Ghanaian market terms (e.g. sika, cedis, gari, rice, tomatoes, transport).';
-    } else if (language === 'hausa') {
-      langHint = 'The audio is spoken in native Hausa. Listen closely to West African market vendor vocabulary and financial numbers.';
-    } else if (language === 'dagbani') {
-      langHint = 'The audio is spoken in native Dagbani (Northern Ghana language). Listen carefully to local vendor numbers, goods, and expenses.';
-    } else if (language === 'pidgin') {
-      langHint = 'The audio is spoken in West African / Ghanaian Pidgin English.';
-    }
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: [
-        {
-          inlineData: {
-            mimeType: mimeType || 'audio/webm',
-            data: audioBase64,
-          },
-        },
-        `You are an expert multilingual speech transcriber and translator for African market vendors.
-${langHint}
-
-TASK:
-1. Transcribe the vendor's spoken dictation.
-2. Translate any non-English speech (Twi, Hausa, Dagbani, Pidgin) into clear, natural English notes suitable for structured bookkeeping.
-3. Keep all prices, quantities, product names, customer comments, and expenses intact.
-4. Output ONLY the clean transcribed/translated text statement (1-3 sentences or paragraphs). Do not add preamble or markdown wrapper.`
-      ],
-    });
-
-    const transcript = response.text ? response.text.trim() : '';
-    return res.json({ success: true, transcript });
-  } catch (error: any) {
-    console.error('Error transcribing audio dictation:', error);
-    return res.status(500).json({ success: false, error: error.message || 'Failed to transcribe audio' });
-  }
+// Audio transcription is not supported with a local Gemma 4 text model
+app.post('/api/transcribe-audio', (req, res) => {
+  res.status(501).json({
+    error: 'Audio transcription is not supported with the local Gemma 4 model. Consider using a local Whisper model or a cloud transcription service.',
+  });
 });
 
 // Vite server integration
@@ -328,6 +226,7 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`[Market Vendor Daily Ledger] Express server running on http://0.0.0.0:${PORT}`);
+    console.log(`[LM Studio] Connecting to: ${LM_STUDIO_BASE_URL} | Model: ${LM_STUDIO_MODEL}`);
   });
 }
 

@@ -32,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   Market Vendor <span className="text-amber-400">Daily Ledger</span>
                 </h1>
                 <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-900/80 text-amber-300 border border-amber-800">
-                  <Sparkles className="w-3 h-3 text-amber-400" /> Gemma / Gemini AI
+                  <Sparkles className="w-3 h-3 text-amber-400" /> Gemma 4 AI
                 </span>
               </div>
               <p className="text-xs text-amber-300/80">
