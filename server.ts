@@ -33,7 +33,7 @@ app.get('/api/health', (req, res) => {
 // API Route: Analyze raw vendor notes into structured ledger
 app.post('/api/analyze-ledger', async (req, res) => {
   try {
-    const { notes, currency = 'GHS', vendorName = 'Vendor', businessType = 'Market Stall' } = req.body;
+    const { notes, currency = 'GHS', vendorName = 'Vendor', businessType = 'Market Stall', stockProducts = [] } = req.body;
 
     if (!notes || typeof notes !== 'string' || notes.trim().length === 0) {
       return res.status(400).json({ error: 'Vendor notes text is required' });
@@ -56,12 +56,22 @@ CRITICAL RULES:
 5. Extract Customer Feedback & Feedback Intelligence:
    - Identify explicit customer complaints, compliments, pricing concerns, or requested products not currently stocked.
    - Categorize severity as 'low', 'medium', or 'high', and provide a practical, realistic suggested response action.
-6. Generate 3-5 High-Value Actionable Business Insights:
+6. Extract Stock Received / Restocked Today:
+   - Identify any new stock RECEIVED or DELIVERED from suppliers today (e.g. "received 20 bags rice", "got 5 gallons palm oil from depot", "new delivery of 10 crates tomatoes").
+   - Put these in the "restocks" array with the quantity received and unit cost if mentioned.
+   - Do NOT include items the vendor plans to buy tomorrow — only stock actually received today.
+7. Generate 3-5 High-Value Actionable Business Insights:
    - Concrete, highly practical advice tailored for small market vendors (e.g., supplier negotiation tactics, pricing adjustments, stocking new requested items, preventing spoilage, bundling fast and slow movers).
-7. Generate Tomorrow's Actionable To-Do List:
+8. Generate Tomorrow's Actionable To-Do List:
    - Priority items to execute first thing tomorrow morning.
 
 Be realistic, practical, and highly empathetic to market vendors.
+
+${stockProducts.length > 0 ? `STOCK CATALOGUE (registered products — use these EXACT names in the "itemName" field of sales when the item matches):
+${stockProducts.map((p: any) => `- "${p.name}" | unit: ${p.unit} | category: ${p.category} | current stock: ${p.currentStock} ${p.unit}`).join('\n')}
+
+When an item sold clearly matches a catalogue product, use the catalogue's exact name. If a sold item has NO match in the catalogue, still include it in sales — and set its "notes" field to "Not in stock catalogue — add to Stock Manager".
+Similarly for restocks: if a received item matches a catalogue product, use the catalogue's exact name.` : ''}
 
 Respond ONLY with a valid JSON object matching this exact structure:
 {
@@ -71,6 +81,7 @@ Respond ONLY with a valid JSON object matching this exact structure:
   "netProfit": number,
   "sales": [{ "itemName": "string", "quantitySold": number, "unitPrice": number, "totalRevenue": number, "category": "string", "notes": "string" }],
   "expenses": [{ "description": "string", "cost": number, "category": "string", "notes": "string" }],
+  "restocks": [{ "itemName": "string", "quantityReceived": number, "unitCost": number, "notes": "string" }],
   "inventory": [{ "itemName": "string", "status": "in_stock|low_stock|restock_needed|spoiled_damaged", "estimatedRemaining": "string", "restockQuantityNeeded": "string", "notes": "string" }],
   "feedback": [{ "customerComment": "string", "category": "complaint|praise|inquiry|price_concern", "severity": "low|medium|high", "suggestedAction": "string" }],
   "insights": [{ "title": "string", "description": "string", "category": "pricing|inventory|customer_service|operations|supplier", "impact": "high|medium|low" }],
@@ -122,6 +133,19 @@ Respond ONLY with a valid JSON object matching this exact structure:
                     notes: { type: 'string' },
                   },
                   required: ['description', 'cost'],
+                },
+              },
+              restocks: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    itemName: { type: 'string' },
+                    quantityReceived: { type: 'number' },
+                    unitCost: { type: 'number' },
+                    notes: { type: 'string' },
+                  },
+                  required: ['itemName', 'quantityReceived'],
                 },
               },
               inventory: {
@@ -176,7 +200,7 @@ Respond ONLY with a valid JSON object matching this exact structure:
                 },
               },
             },
-            required: ['summaryHeadline', 'totalRevenue', 'totalExpenses', 'netProfit', 'sales', 'expenses', 'inventory', 'feedback', 'insights', 'tasks'],
+            required: ['summaryHeadline', 'totalRevenue', 'totalExpenses', 'netProfit', 'sales', 'expenses', 'restocks', 'inventory', 'feedback', 'insights', 'tasks'],
           },
         },
       } as any,
@@ -212,6 +236,42 @@ Respond ONLY with a valid JSON object matching this exact structure:
     return res.status(500).json({
       success: false,
       error: error.message || 'Failed to process vendor notes with local LM Studio.',
+    });
+  }
+});
+
+// LM Studio status check — returns server info and loaded models
+app.get('/api/lm-studio-status', async (req, res) => {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    const response = await fetch(`${LM_STUDIO_BASE_URL}/models`, {
+      signal: controller.signal,
+      headers: { Authorization: 'Bearer lm-studio' },
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      return res.json({ connected: false, error: `LM Studio responded with ${response.status}` });
+    }
+
+    const data = await response.json() as any;
+    const models: string[] = (data.data || []).map((m: any) => m.id);
+
+    return res.json({
+      connected: true,
+      baseUrl: LM_STUDIO_BASE_URL,
+      configuredModel: LM_STUDIO_MODEL,
+      modelLoaded: models.includes(LM_STUDIO_MODEL),
+      availableModels: models,
+    });
+  } catch (err: any) {
+    return res.json({
+      connected: false,
+      baseUrl: LM_STUDIO_BASE_URL,
+      configuredModel: LM_STUDIO_MODEL,
+      error: err.name === 'AbortError' ? 'Connection timed out — is LM Studio running?' : err.message,
     });
   }
 });

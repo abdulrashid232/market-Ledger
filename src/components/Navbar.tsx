@@ -1,11 +1,11 @@
 import React from 'react';
-import { Store, FileSpreadsheet, BarChart3, Calculator, Sparkles } from 'lucide-react';
+import { Store, FileSpreadsheet, BarChart3, Calculator, Sparkles, Package, Settings } from 'lucide-react';
 import { CurrencyCode } from '../types';
 import { CURRENCIES } from '../lib/constants';
 
 interface NavbarProps {
-  activeTab: 'new' | 'history' | 'till' | 'presets';
-  setActiveTab: (tab: 'new' | 'history' | 'till' | 'presets') => void;
+  activeTab: 'new' | 'history' | 'till' | 'stock' | 'setup' | 'presets';
+  setActiveTab: (tab: 'new' | 'history' | 'till' | 'stock' | 'setup' | 'presets') => void;
   selectedCurrency: CurrencyCode;
   setSelectedCurrency: (currency: CurrencyCode) => void;
 }
@@ -98,6 +98,30 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Calculator className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Till Calculator</span>
                 <span className="sm:hidden">Till</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('stock')}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === 'stock'
+                    ? 'bg-amber-500 text-amber-950 shadow-sm font-bold'
+                    : 'text-amber-200 hover:text-white hover:bg-amber-900/60'
+                }`}
+              >
+                <Package className="w-3.5 h-3.5" />
+                <span>Stock</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('setup')}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === 'setup'
+                    ? 'bg-amber-500 text-amber-950 shadow-sm font-bold'
+                    : 'text-amber-200 hover:text-white hover:bg-amber-900/60'
+                }`}
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Setup</span>
               </button>
             </nav>
 

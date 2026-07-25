@@ -57,6 +57,32 @@ export interface DailyTask {
   priority: 'high' | 'medium' | 'low';
 }
 
+export interface StockProduct {
+  id: string;
+  name: string;
+  category: string;
+  unit: string; // e.g. 'bags', 'kg', 'crates', 'pieces'
+  currentStock: number;
+  lowStockThreshold: number;
+  unitCost: number;   // buying / wholesale price
+  unitPrice: number;  // selling price
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface StockTransaction {
+  id: string;
+  productId: string;
+  productName: string;
+  type: 'sale' | 'restock' | 'adjustment' | 'spoilage';
+  quantity: number; // positive = stock in, negative = stock out
+  unitCost?: number;
+  notes?: string;
+  reportId?: string;
+  date: string;
+  createdAt: number;
+}
+
 export interface CashTillDenominations {
   [key: string]: number; // e.g. "200": 5 (meaning 5 notes of 200)
 }

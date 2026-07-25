@@ -7,17 +7,23 @@ import { TillCalculator } from './components/TillCalculator';
 import { WhatsAppExportModal } from './components/WhatsAppExportModal';
 import { CurrencyCode, DailyLedgerReport } from './types';
 import { getSavedReports, saveReport, deleteReport } from './lib/ledgerStorage';
-import { AlertCircle, Sparkles, Store, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, Sparkles, Store, RefreshCw, CheckCircle2, Package } from 'lucide-react';
+import { StockManager } from './components/StockManager';
+import { SetupGuide } from './components/SetupGuide';
+import { deductSalesFromStock, processAIRestocks, getStockProducts, DeductionResult } from './lib/stockStorage';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'new' | 'history' | 'till' | 'presets'>('new');
+  const [activeTab, setActiveTab] = useState<'new' | 'history' | 'till' | 'stock' | 'setup' | 'presets'>('new');
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>('GHS');
-  
+
   const [reports, setReports] = useState<DailyLedgerReport[]>([]);
   const [currentReport, setCurrentReport] = useState<DailyLedgerReport | null>(null);
 
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [stockDeductions, setStockDeductions] = useState<DeductionResult[]>([]);
+  const [stockUnmatched, setStockUnmatched] = useState<string[]>([]);
+  const [stockRestocked, setStockRestocked] = useState<Array<{ productName: string; quantity: number; unit: string }>>([]);
 
   const [whatsappModalReport, setWhatsappModalReport] = useState<DailyLedgerReport | null>(null);
 
@@ -41,10 +47,11 @@ export default function App() {
     setErrorMessage(null);
 
     try {
+      const stockProducts = getStockProducts();
       const res = await fetch('/api/analyze-ledger', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, stockProducts }),
       });
 
       const data = await res.json();
@@ -100,6 +107,32 @@ export default function App() {
       // Automatically save new report to history
       const updatedList = saveReport(newReport);
       setReports(updatedList);
+
+      // Auto-deduct sold quantities from stock catalogue
+      const { deducted, unmatched } = deductSalesFromStock(newReport.sales, newReport.id, newReport.date);
+      if (deducted.length > 0) {
+        setStockDeductions(deducted);
+        setTimeout(() => setStockDeductions([]), 6000);
+      }
+      if (unmatched.length > 0) {
+        setStockUnmatched(unmatched);
+        setTimeout(() => setStockUnmatched([]), 10000);
+      }
+
+      // Auto-add restocked quantities detected in notes
+      const aiRestocks = parsed.restocks || [];
+      if (aiRestocks.length > 0) {
+        const { restocked, unmatched: unmatchedRestocks } = processAIRestocks(aiRestocks, newReport.date);
+        if (restocked.length > 0) {
+          setStockRestocked(restocked);
+          setTimeout(() => setStockRestocked([]), 7000);
+        }
+        if (unmatchedRestocks.length > 0) {
+          setStockUnmatched((prev) => [...prev, ...unmatchedRestocks]);
+          setTimeout(() => setStockUnmatched([]), 10000);
+        }
+      }
+
       setIsAnalyzing(false);
     } catch (err: any) {
       console.error('Analysis error:', err);
@@ -127,11 +160,57 @@ export default function App() {
       
       {/* Top Navbar */}
       <Navbar
-        activeTab={activeTab === 'presets' ? 'new' : activeTab}
+        activeTab={activeTab === 'presets' ? 'new' : activeTab as any}
         setActiveTab={setActiveTab}
         selectedCurrency={selectedCurrency}
         setSelectedCurrency={setSelectedCurrency}
       />
+
+      {/* Stock auto-deduction success notification */}
+      {stockDeductions.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-50 bg-emerald-900 text-emerald-100 rounded-2xl shadow-xl p-4 max-w-sm space-y-1 border border-emerald-700">
+          <p className="text-xs font-bold flex items-center gap-2">
+            <Package className="w-4 h-4 text-emerald-400" />
+            Stock auto-updated from today's sales:
+          </p>
+          {stockDeductions.map((d, i) => (
+            <p key={i} className="text-xs text-emerald-300">
+              — {d.productName}: <strong>-{d.deducted} {d.unit}</strong>
+            </p>
+          ))}
+        </div>
+      )}
+
+      {/* Stock restock notification */}
+      {stockRestocked.length > 0 && (
+        <div className="fixed bottom-6 left-6 z-50 bg-blue-900 text-blue-100 rounded-2xl shadow-xl p-4 max-w-sm space-y-1 border border-blue-700">
+          <p className="text-xs font-bold flex items-center gap-2">
+            <Package className="w-4 h-4 text-blue-400" />
+            Stock updated from today's restocks:
+          </p>
+          {stockRestocked.map((r, i) => (
+            <p key={i} className="text-xs text-blue-300">
+              — {r.productName}: <strong>+{r.quantity} {r.unit}</strong>
+            </p>
+          ))}
+        </div>
+      )}
+
+      {/* Unmatched items warning */}
+      {stockUnmatched.length > 0 && (
+        <div className={`fixed z-50 bg-amber-900 text-amber-100 rounded-2xl shadow-xl p-4 max-w-sm space-y-1 border border-amber-700 ${stockDeductions.length > 0 ? 'bottom-6 left-6' : 'bottom-6 right-6'}`}>
+          <p className="text-xs font-bold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-400" />
+            Items sold but not in stock catalogue:
+          </p>
+          {stockUnmatched.map((name, i) => (
+            <p key={i} className="text-xs text-amber-300">— {name}</p>
+          ))}
+          <p className="text-[10px] text-amber-400 pt-1 border-t border-amber-800">
+            Go to Stock tab → Add Product to track these items.
+          </p>
+        </div>
+      )}
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -201,6 +280,16 @@ export default function App() {
             selectedCurrency={selectedCurrency}
             expectedNetCash={currentReport?.netProfit || 0}
           />
+        )}
+
+        {/* TAB 4: Stock Inventory Manager */}
+        {activeTab === 'stock' && (
+          <StockManager selectedCurrency={selectedCurrency} />
+        )}
+
+        {/* TAB 5: Setup Guide */}
+        {activeTab === 'setup' && (
+          <SetupGuide />
         )}
 
       </main>
