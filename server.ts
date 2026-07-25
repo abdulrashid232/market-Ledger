@@ -184,6 +184,28 @@ Respond ONLY with a valid JSON object matching this exact structure:
 
     const content = response.choices[0]?.message?.content || '{}';
     const parsedData = JSON.parse(content);
+
+    // Recalculate totals server-side — local models often fail at arithmetic
+    if (Array.isArray(parsedData.sales)) {
+      parsedData.sales = parsedData.sales.map((s: any) => {
+        const qty = Number(s.quantitySold) || 1;
+        const unit = Number(s.unitPrice) || 0;
+        const computed = qty * unit;
+        // Use computed value if the model returned 0 but qty*unitPrice is valid
+        if (computed > 0 && (!s.totalRevenue || s.totalRevenue === 0)) {
+          s.totalRevenue = computed;
+        }
+        return s;
+      });
+      parsedData.totalRevenue = parsedData.sales.reduce((sum: number, s: any) => sum + (Number(s.totalRevenue) || 0), 0);
+    }
+
+    if (Array.isArray(parsedData.expenses)) {
+      parsedData.totalExpenses = parsedData.expenses.reduce((sum: number, e: any) => sum + (Number(e.cost) || 0), 0);
+    }
+
+    parsedData.netProfit = (Number(parsedData.totalRevenue) || 0) - (Number(parsedData.totalExpenses) || 0);
+
     return res.json({ success: true, data: parsedData });
   } catch (error: any) {
     console.error('Error analyzing ledger notes:', error);
