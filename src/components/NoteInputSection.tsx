@@ -49,15 +49,14 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
   const [isBrowserDictating, setIsBrowserDictating] = useState<boolean>(false);
   const [speechSupported, setSpeechSupported] = useState<boolean>(false);
   const [dictationNotice, setDictationNotice] = useState<string | null>(null);
+  const [isTranscribingAudio] = useState<boolean>(false);
   const recognitionRef = useRef<any>(null);
 
-  // Audio Recording state
+  // Audio Recording state (uses Web Speech API)
   const [isRecordingAudio, setIsRecordingAudio] = useState<boolean>(false);
   const [recordingSeconds, setRecordingSeconds] = useState<number>(0);
-  const [isTranscribingAudio, setIsTranscribingAudio] = useState<boolean>(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
   const timerIntervalRef = useRef<any>(null);
+  const audioRecognitionRef = useRef<any>(null);
 
   // Analysis Loading Steps
   const [analysisStep, setAnalysisStep] = useState<number>(0);
@@ -159,86 +158,76 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
     }
   };
 
-  // Start Multilingual Audio Recording
-  const startAudioRecording = async () => {
+  // Start Multilingual Audio Recording via Web Speech API
+  const startAudioRecording = () => {
     setDictationNotice(null);
-    try {
-      if (isBrowserDictating && recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch (e) {}
-        setIsBrowserDictating(false);
-      }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setDictationNotice('Voice recording is not supported in this browser. Please use Chrome or Edge, or type your notes directly.');
+      return;
+    }
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+    if (isBrowserDictating && recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+      setIsBrowserDictating(false);
+    }
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+    const recognition = new SpeechRecognition();
+    audioRecognitionRef.current = recognition;
+
+    let langCode = 'en-US';
+    if (selectedLang === 'twi') langCode = 'ak-GH';
+    else if (selectedLang === 'hausa') langCode = 'ha-NG';
+    else if (selectedLang === 'pidgin') langCode = 'en-GH';
+    recognition.lang = langCode;
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          transcript += event.results[i][0].transcript + ' ';
         }
-      };
+      }
+      if (transcript.trim()) {
+        setNotes((prev) => (prev ? `${prev.trim()} ${transcript.trim()}` : transcript.trim()));
+      }
+    };
 
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((track) => track.stop());
-        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType || 'audio/webm' });
-        await processAudioBlob(audioBlob, mediaRecorder.mimeType || 'audio/webm');
-      };
+    recognition.onerror = (event: any) => {
+      clearInterval(timerIntervalRef.current);
+      setIsRecordingAudio(false);
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        setDictationNotice('Microphone access was blocked. Please allow microphone permissions in your browser and try again.');
+      } else if (event.error !== 'no-speech') {
+        setDictationNotice(`Voice recognition error: ${event.error}. Please try again.`);
+      }
+    };
 
-      mediaRecorder.start(250);
+    recognition.onend = () => {
+      clearInterval(timerIntervalRef.current);
+      setIsRecordingAudio(false);
+    };
+
+    try {
+      recognition.start();
       setIsRecordingAudio(true);
       setRecordingSeconds(0);
-
       timerIntervalRef.current = setInterval(() => {
         setRecordingSeconds((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      console.error('Failed to access microphone:', err);
-      setDictationNotice('Microphone access is needed for recording. Please allow microphone permissions in your browser bar.');
+      setDictationNotice('Could not start voice recording. Please try again.');
     }
   };
 
-  // Stop Audio Recording & Send for Multilingual Transcription/Translation
+  // Stop Audio Recording
   const stopAudioRecording = () => {
-    if (mediaRecorderRef.current && isRecordingAudio) {
+    if (audioRecognitionRef.current && isRecordingAudio) {
+      try { audioRecognitionRef.current.stop(); } catch (e) {}
       clearInterval(timerIntervalRef.current);
-      mediaRecorderRef.current.stop();
       setIsRecordingAudio(false);
-    }
-  };
-
-  const processAudioBlob = async (blob: Blob, mimeType: string) => {
-    setIsTranscribingAudio(true);
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = async () => {
-        const base64Data = (reader.result as string).split(',')[1];
-
-        const res = await fetch('/api/transcribe-audio', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            audioBase64: base64Data,
-            mimeType: mimeType || 'audio/webm',
-            language: selectedLang,
-          }),
-        });
-
-        const data = await res.json();
-        setIsTranscribingAudio(false);
-
-        if (data.success && data.transcript) {
-          const cleanTranscript = data.transcript.trim();
-          setNotes((prev) => (prev ? `${prev.trim()}\n${cleanTranscript}` : cleanTranscript));
-        } else {
-          setDictationNotice('Could not transcribe audio note. Please try again or type directly.');
-        }
-      };
-    } catch (err) {
-      console.error('Error processing audio blob:', err);
-      setIsTranscribingAudio(false);
-      setDictationNotice('Error transcribing audio. Please try again or type your note.');
     }
   };
 
