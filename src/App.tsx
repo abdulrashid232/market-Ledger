@@ -26,6 +26,7 @@ export default function App() {
   const [stockRestocked, setStockRestocked] = useState<Array<{ productName: string; quantity: number; unit: string }>>([]);
 
   const [whatsappModalReport, setWhatsappModalReport] = useState<DailyLedgerReport | null>(null);
+  const [analysisSuccess, setAnalysisSuccess] = useState<{ headline: string; profit: number; currency: string } | null>(null);
 
   useEffect(() => {
     // Load historical reports on mount
@@ -134,6 +135,9 @@ export default function App() {
         }
       }
 
+      setAnalysisSuccess({ headline: newReport.summaryHeadline, profit: newReport.netProfit, currency: newReport.currencySymbol });
+      setTimeout(() => setAnalysisSuccess(null), 7000);
+
       setIsAnalyzing(false);
     } catch (err: any) {
       console.error('Analysis error:', err);
@@ -209,6 +213,20 @@ export default function App() {
           ))}
           <p className="text-[10px] text-amber-400 pt-1 border-t border-amber-800">
             Go to Stock tab → Add Product to track these items.
+          </p>
+        </div>
+      )}
+
+      {/* Analysis success notification */}
+      {analysisSuccess && (
+        <div className="fixed top-6 right-6 z-50 bg-white border border-emerald-200 rounded-2xl shadow-xl p-4 max-w-sm space-y-1 animate-in fade-in slide-in-from-top-2">
+          <p className="text-xs font-bold text-emerald-700 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            Analysis complete!
+          </p>
+          <p className="text-sm font-semibold text-stone-800 leading-snug">{analysisSuccess.headline}</p>
+          <p className="text-xs text-stone-500">
+            Net profit: <span className="font-bold text-emerald-700">{analysisSuccess.currency}{analysisSuccess.profit.toLocaleString()}</span>
           </p>
         </div>
       )}
