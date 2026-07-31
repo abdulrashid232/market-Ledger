@@ -1,122 +1,73 @@
 import { StockProduct, StockTransaction } from '../types';
 
-const STOCK_PRODUCTS_KEY = 'market_ledger_stock_products_v1';
-const STOCK_TRANSACTIONS_KEY = 'market_ledger_stock_transactions_v1';
+// ── Products ─────────────────────────────────────────────────────────────────
 
-// ── Products ────────────────────────────────────────────────────────────────
-
-export function getStockProducts(): StockProduct[] {
+export async function getStockProducts(): Promise<StockProduct[]> {
   try {
-    const raw = localStorage.getItem(STOCK_PRODUCTS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
+    const res = await fetch('/api/stock/products');
+    if (!res.ok) return [];
+    return res.json();
+  } catch (err) {
+    console.error('Failed to load stock products:', err);
     return [];
   }
 }
 
-export function saveStockProduct(product: StockProduct): StockProduct[] {
-  const products = getStockProducts();
-  const idx = products.findIndex((p) => p.id === product.id);
-  let updated: StockProduct[];
-  if (idx >= 0) {
-    updated = [...products];
-    updated[idx] = { ...product, updatedAt: Date.now() };
-  } else {
-    updated = [product, ...products];
-  }
-  localStorage.setItem(STOCK_PRODUCTS_KEY, JSON.stringify(updated));
-  return updated;
+export async function saveStockProduct(product: StockProduct): Promise<void> {
+  await fetch('/api/stock/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(product),
+  });
 }
 
-export function deleteStockProduct(id: string): StockProduct[] {
-  const updated = getStockProducts().filter((p) => p.id !== id);
-  localStorage.setItem(STOCK_PRODUCTS_KEY, JSON.stringify(updated));
-  return updated;
+export async function deleteStockProduct(id: string): Promise<void> {
+  await fetch(`/api/stock/products/${id}`, { method: 'DELETE' });
 }
 
-// ── Transactions ────────────────────────────────────────────────────────────
+// ── Transactions ──────────────────────────────────────────────────────────────
 
-export function getStockTransactions(): StockTransaction[] {
+export async function getStockTransactions(): Promise<StockTransaction[]> {
   try {
-    const raw = localStorage.getItem(STOCK_TRANSACTIONS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
+    const res = await fetch('/api/stock/transactions');
+    if (!res.ok) return [];
+    return res.json();
+  } catch (err) {
+    console.error('Failed to load stock transactions:', err);
     return [];
   }
 }
 
-function persistTransaction(tx: StockTransaction): void {
-  const txs = getStockTransactions();
-  localStorage.setItem(STOCK_TRANSACTIONS_KEY, JSON.stringify([tx, ...txs]));
-}
+// ── Restock ───────────────────────────────────────────────────────────────────
 
-// ── Restock ─────────────────────────────────────────────────────────────────
-
-export function restockProduct(
+export async function restockProduct(
   productId: string,
   quantity: number,
   unitCost: number,
   date: string,
   notes?: string
-): StockProduct[] {
-  const products = getStockProducts();
-  const product = products.find((p) => p.id === productId);
-  if (!product) return products;
-
-  product.currentStock += quantity;
-  product.updatedAt = Date.now();
-  if (unitCost > 0) product.unitCost = unitCost;
-
-  localStorage.setItem(STOCK_PRODUCTS_KEY, JSON.stringify(products));
-
-  persistTransaction({
-    id: `tx-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    productId,
-    productName: product.name,
-    type: 'restock',
-    quantity,
-    unitCost,
-    notes: notes || `Restocked ${quantity} ${product.unit}`,
-    date,
-    createdAt: Date.now(),
+): Promise<void> {
+  await fetch('/api/stock/restock', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId, quantity, unitCost, date, notes }),
   });
-
-  return products;
 }
 
-// ── Manual Adjustment ────────────────────────────────────────────────────────
+// ── Manual Adjustment ─────────────────────────────────────────────────────────
 
-export function adjustStockProduct(
+export async function adjustStockProduct(
   productId: string,
   newStock: number,
   notes: string,
   date: string
-): StockProduct[] {
-  const products = getStockProducts();
-  const product = products.find((p) => p.id === productId);
-  if (!product) return products;
-
-  const diff = newStock - product.currentStock;
-  product.currentStock = Math.max(0, newStock);
-  product.updatedAt = Date.now();
-
-  localStorage.setItem(STOCK_PRODUCTS_KEY, JSON.stringify(products));
-
-  persistTransaction({
-    id: `tx-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    productId,
-    productName: product.name,
-    type: 'adjustment',
-    quantity: diff,
-    notes: notes || 'Manual stock adjustment',
-    date,
-    createdAt: Date.now(),
+): Promise<void> {
+  await fetch('/api/stock/adjust', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId, newStock, notes, date }),
   });
-
-  return products;
 }
-
-// ── Auto-deduct from daily sales ─────────────────────────────────────────────
 
 // ── AI Restock Processing ─────────────────────────────────────────────────────
 
@@ -132,39 +83,25 @@ export interface RestockSummary {
   unmatched: string[];
 }
 
-export function processAIRestocks(
+export async function processAIRestocks(
   restocks: AIRestockItem[],
   date: string
-): RestockSummary {
-  const products = getStockProducts();
-  const restocked: RestockSummary['restocked'] = [];
-  const unmatched: string[] = [];
-
-  for (const item of restocks) {
-    const qty = Number(item.quantityReceived) || 0;
-    if (qty <= 0) continue;
-
-    const restockName = item.itemName.toLowerCase();
-    const product = products.find((p) => {
-      const prodName = p.name.toLowerCase();
-      const minLen = Math.min(prodName.length, restockName.length, 4);
-      return (
-        prodName.slice(0, minLen) === restockName.slice(0, minLen) ||
-        restockName.includes(prodName) ||
-        prodName.includes(restockName)
-      );
+): Promise<RestockSummary> {
+  try {
+    const res = await fetch('/api/stock/process-restocks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ restocks, date }),
     });
-
-    if (product) {
-      restockProduct(product.id, qty, Number(item.unitCost) || 0, date, item.notes);
-      restocked.push({ productName: product.name, quantity: qty, unit: product.unit });
-    } else {
-      unmatched.push(item.itemName);
-    }
+    if (!res.ok) return { restocked: [], unmatched: [] };
+    return res.json();
+  } catch (err) {
+    console.error('Failed to process AI restocks:', err);
+    return { restocked: [], unmatched: [] };
   }
-
-  return { restocked, unmatched };
 }
+
+// ── Deduct sales from stock ───────────────────────────────────────────────────
 
 export interface DeductionResult {
   productName: string;
@@ -174,60 +111,24 @@ export interface DeductionResult {
 
 export interface DeductionSummary {
   deducted: DeductionResult[];
-  unmatched: string[]; // itemNames from sales with no matching product
+  unmatched: string[];
 }
 
-export function deductSalesFromStock(
+export async function deductSalesFromStock(
   sales: Array<{ itemName: string; quantitySold: number }>,
   reportId: string,
   date: string
-): DeductionSummary {
-  const products = getStockProducts();
-  const deducted: DeductionResult[] = [];
-  const unmatched: string[] = [];
-
-  for (const sale of sales) {
-    const qty = Number(sale.quantitySold) || 0;
-    if (qty <= 0) continue;
-
-    const saleName = sale.itemName.toLowerCase();
-
-    // Match: catalogue name is contained in sale name, or vice versa (min 4 chars to avoid false positives)
-    const product = products.find((p) => {
-      const prodName = p.name.toLowerCase();
-      const minLen = Math.min(prodName.length, saleName.length, 4);
-      return (
-        prodName.slice(0, minLen) === saleName.slice(0, minLen) ||
-        saleName.includes(prodName) ||
-        prodName.includes(saleName)
-      );
+): Promise<DeductionSummary> {
+  try {
+    const res = await fetch('/api/stock/deduct-sales', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sales, reportId, date }),
     });
-
-    if (product) {
-      product.currentStock = Math.max(0, product.currentStock - qty);
-      product.updatedAt = Date.now();
-
-      persistTransaction({
-        id: `tx-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        productId: product.id,
-        productName: product.name,
-        type: 'sale',
-        quantity: -qty,
-        reportId,
-        notes: `Auto-deducted: sold ${qty} ${product.unit} (from notes: "${sale.itemName}")`,
-        date,
-        createdAt: Date.now(),
-      });
-
-      deducted.push({ productName: product.name, deducted: qty, unit: product.unit });
-    } else {
-      unmatched.push(sale.itemName);
-    }
+    if (!res.ok) return { deducted: [], unmatched: [] };
+    return res.json();
+  } catch (err) {
+    console.error('Failed to deduct sales from stock:', err);
+    return { deducted: [], unmatched: [] };
   }
-
-  if (deducted.length > 0) {
-    localStorage.setItem(STOCK_PRODUCTS_KEY, JSON.stringify(products));
-  }
-
-  return { deducted, unmatched };
 }

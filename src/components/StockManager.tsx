@@ -116,13 +116,16 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    setProducts(getStockProducts());
-    setTransactions(getStockTransactions());
+    Promise.all([getStockProducts(), getStockTransactions()]).then(([prods, txs]) => {
+      setProducts(prods);
+      setTransactions(txs);
+    });
   }, []);
 
-  function reload() {
-    setProducts(getStockProducts());
-    setTransactions(getStockTransactions());
+  async function reload() {
+    const [prods, txs] = await Promise.all([getStockProducts(), getStockTransactions()]);
+    setProducts(prods);
+    setTransactions(txs);
   }
 
   // ── Stats ────────────────────────────────────────────────────────────────
@@ -179,36 +182,32 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
       updatedAt: Date.now(),
     };
 
-    saveStockProduct(product);
-    reload();
+    saveStockProduct(product).then(() => reload());
     setShowModal(false);
   }
 
   function handleDelete(id: string) {
-    deleteStockProduct(id);
-    reload();
+    deleteStockProduct(id).then(() => reload());
   }
 
   // ── Restock ──────────────────────────────────────────────────────────────
   function handleRestock(productId: string) {
     const qty = Number(restockQty);
     if (!qty || qty <= 0) return;
-    restockProduct(productId, qty, Number(restockCost) || 0, today);
     setRestockingId(null);
     setRestockQty('');
     setRestockCost('');
-    reload();
+    restockProduct(productId, qty, Number(restockCost) || 0, today).then(() => reload());
   }
 
   // ── Adjust ───────────────────────────────────────────────────────────────
   function handleAdjust(productId: string) {
     const qty = Number(adjustQty);
     if (isNaN(qty) || qty < 0) return;
-    adjustStockProduct(productId, qty, adjustNotes || 'Manual adjustment', today);
     setAdjustingId(null);
     setAdjustQty('');
     setAdjustNotes('');
-    reload();
+    adjustStockProduct(productId, qty, adjustNotes || 'Manual adjustment', today).then(() => reload());
   }
 
   const txTypeConfig = {

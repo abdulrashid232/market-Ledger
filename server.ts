@@ -1,9 +1,10 @@
 import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
+import db from './db.js';
 
 dotenv.config();
 
@@ -276,7 +277,359 @@ app.get('/api/lm-studio-status', async (req, res) => {
   }
 });
 
-// Audio generation is not supported with a local Gemma 4 text model
+// ── Helper: map DB row → DailyLedgerReport ────────────────────────────────
+function rowToReport(row: any) {
+  return {
+    id: row.id,
+    date: row.date,
+    currency: row.currency,
+    currencySymbol: row.currency_symbol,
+    rawNotes: row.raw_notes,
+    vendorName: row.vendor_name,
+    businessType: row.business_type,
+    summaryHeadline: row.summary_headline,
+    totalRevenue: row.total_revenue,
+    totalExpenses: row.total_expenses,
+    netProfit: row.net_profit,
+    cashInDrawer: row.cash_in_drawer,
+    cashDiscrepancy: row.cash_discrepancy,
+    sales: JSON.parse(row.sales),
+    expenses: JSON.parse(row.expenses),
+    inventory: JSON.parse(row.inventory),
+    feedback: JSON.parse(row.feedback),
+    insights: JSON.parse(row.insights),
+    tasks: JSON.parse(row.tasks),
+    createdAt: row.created_at,
+  };
+}
+
+// ── Helper: map DB row → StockProduct ─────────────────────────────────────
+function rowToProduct(row: any) {
+  return {
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    unit: row.unit,
+    currentStock: row.current_stock,
+    lowStockThreshold: row.low_stock_threshold,
+    unitCost: row.unit_cost,
+    unitPrice: row.unit_price,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+// ── Helper: map DB row → StockTransaction ─────────────────────────────────
+function rowToTransaction(row: any) {
+  return {
+    id: row.id,
+    productId: row.product_id,
+    productName: row.product_name,
+    type: row.type,
+    quantity: row.quantity,
+    unitCost: row.unit_cost,
+    notes: row.notes,
+    reportId: row.report_id,
+    date: row.date,
+    createdAt: row.created_at,
+  };
+}
+
+// ── Fuzzy product matcher ──────────────────────────────────────────────────
+function fuzzyFindProduct(products: any[], itemName: string) {
+  const name = itemName.toLowerCase();
+  return products.find((p: any) => {
+    const prodName = p.name.toLowerCase();
+    const minLen = Math.min(prodName.length, name.length, 4);
+    return (
+      prodName.slice(0, minLen) === name.slice(0, minLen) ||
+      name.includes(prodName) ||
+      prodName.includes(name)
+    );
+  });
+}
+
+// ── Reports API ────────────────────────────────────────────────────────────
+
+app.get('/api/reports', (_req, res) => {
+  const rows = db.prepare('SELECT * FROM reports ORDER BY created_at DESC').all();
+  res.json(rows.map(rowToReport));
+});
+
+app.post('/api/reports', (req, res) => {
+  const r = req.body;
+  db.prepare(`
+    INSERT INTO reports (id, date, currency, currency_symbol, raw_notes, vendor_name, business_type,
+      summary_headline, total_revenue, total_expenses, net_profit, cash_in_drawer, cash_discrepancy,
+      sales, expenses, inventory, feedback, insights, tasks, created_at)
+    VALUES (@id, @date, @currency, @currency_symbol, @raw_notes, @vendor_name, @business_type,
+      @summary_headline, @total_revenue, @total_expenses, @net_profit, @cash_in_drawer, @cash_discrepancy,
+      @sales, @expenses, @inventory, @feedback, @insights, @tasks, @created_at)
+    ON CONFLICT(id) DO UPDATE SET
+      date = excluded.date,
+      currency = excluded.currency,
+      currency_symbol = excluded.currency_symbol,
+      raw_notes = excluded.raw_notes,
+      vendor_name = excluded.vendor_name,
+      business_type = excluded.business_type,
+      summary_headline = excluded.summary_headline,
+      total_revenue = excluded.total_revenue,
+      total_expenses = excluded.total_expenses,
+      net_profit = excluded.net_profit,
+      cash_in_drawer = excluded.cash_in_drawer,
+      cash_discrepancy = excluded.cash_discrepancy,
+      sales = excluded.sales,
+      expenses = excluded.expenses,
+      inventory = excluded.inventory,
+      feedback = excluded.feedback,
+      insights = excluded.insights,
+      tasks = excluded.tasks
+  `).run({
+    id: r.id,
+    date: r.date,
+    currency: r.currency,
+    currency_symbol: r.currencySymbol,
+    raw_notes: r.rawNotes,
+    vendor_name: r.vendorName ?? null,
+    business_type: r.businessType ?? null,
+    summary_headline: r.summaryHeadline,
+    total_revenue: r.totalRevenue,
+    total_expenses: r.totalExpenses,
+    net_profit: r.netProfit,
+    cash_in_drawer: r.cashInDrawer ?? null,
+    cash_discrepancy: r.cashDiscrepancy ?? null,
+    sales: JSON.stringify(r.sales ?? []),
+    expenses: JSON.stringify(r.expenses ?? []),
+    inventory: JSON.stringify(r.inventory ?? []),
+    feedback: JSON.stringify(r.feedback ?? []),
+    insights: JSON.stringify(r.insights ?? []),
+    tasks: JSON.stringify(r.tasks ?? []),
+    created_at: r.createdAt,
+  });
+  res.json({ success: true });
+});
+
+app.delete('/api/reports/:id', (req, res) => {
+  db.prepare('DELETE FROM reports WHERE id = ?').run(req.params.id);
+  res.json({ success: true });
+});
+
+// ── Stock Products API ─────────────────────────────────────────────────────
+
+app.get('/api/stock/products', (_req, res) => {
+  const rows = db.prepare('SELECT * FROM stock_products ORDER BY created_at DESC').all();
+  res.json(rows.map(rowToProduct));
+});
+
+app.post('/api/stock/products', (req, res) => {
+  const p = req.body;
+  db.prepare(`
+    INSERT INTO stock_products (id, name, category, unit, current_stock, low_stock_threshold,
+      unit_cost, unit_price, created_at, updated_at)
+    VALUES (@id, @name, @category, @unit, @current_stock, @low_stock_threshold,
+      @unit_cost, @unit_price, @created_at, @updated_at)
+    ON CONFLICT(id) DO UPDATE SET
+      name = excluded.name,
+      category = excluded.category,
+      unit = excluded.unit,
+      current_stock = excluded.current_stock,
+      low_stock_threshold = excluded.low_stock_threshold,
+      unit_cost = excluded.unit_cost,
+      unit_price = excluded.unit_price,
+      updated_at = excluded.updated_at
+  `).run({
+    id: p.id,
+    name: p.name,
+    category: p.category,
+    unit: p.unit,
+    current_stock: p.currentStock,
+    low_stock_threshold: p.lowStockThreshold,
+    unit_cost: p.unitCost,
+    unit_price: p.unitPrice,
+    created_at: p.createdAt,
+    updated_at: p.updatedAt,
+  });
+  res.json({ success: true });
+});
+
+app.delete('/api/stock/products/:id', (req, res) => {
+  db.prepare('DELETE FROM stock_products WHERE id = ?').run(req.params.id);
+  res.json({ success: true });
+});
+
+// ── Stock Transactions API ─────────────────────────────────────────────────
+
+app.get('/api/stock/transactions', (_req, res) => {
+  const rows = db.prepare('SELECT * FROM stock_transactions ORDER BY created_at DESC').all();
+  res.json(rows.map(rowToTransaction));
+});
+
+app.post('/api/stock/transactions', (req, res) => {
+  const t = req.body;
+  db.prepare(`
+    INSERT INTO stock_transactions (id, product_id, product_name, type, quantity, unit_cost,
+      notes, report_id, date, created_at)
+    VALUES (@id, @product_id, @product_name, @type, @quantity, @unit_cost,
+      @notes, @report_id, @date, @created_at)
+  `).run({
+    id: t.id,
+    product_id: t.productId,
+    product_name: t.productName,
+    type: t.type,
+    quantity: t.quantity,
+    unit_cost: t.unitCost ?? null,
+    notes: t.notes ?? null,
+    report_id: t.reportId ?? null,
+    date: t.date,
+    created_at: t.createdAt,
+  });
+  res.json({ success: true });
+});
+
+// ── Restock a product ──────────────────────────────────────────────────────
+
+app.post('/api/stock/restock', (req, res) => {
+  const { productId, quantity, unitCost, date, notes } = req.body;
+  const row = db.prepare('SELECT * FROM stock_products WHERE id = ?').get(productId) as any;
+  if (!row) return res.status(404).json({ error: 'Product not found' });
+
+  const newStock = row.current_stock + quantity;
+  const now = Date.now();
+  db.prepare('UPDATE stock_products SET current_stock = ?, unit_cost = ?, updated_at = ? WHERE id = ?')
+    .run(newStock, unitCost > 0 ? unitCost : row.unit_cost, now, productId);
+
+  db.prepare(`
+    INSERT INTO stock_transactions (id, product_id, product_name, type, quantity, unit_cost, notes, date, created_at)
+    VALUES (?, ?, ?, 'restock', ?, ?, ?, ?, ?)
+  `).run(
+    `tx-${now}-${Math.random().toString(36).slice(2)}`,
+    productId, row.name, quantity, unitCost,
+    notes || `Restocked ${quantity} ${row.unit}`,
+    date, now
+  );
+
+  res.json({ success: true });
+});
+
+// ── Adjust stock ───────────────────────────────────────────────────────────
+
+app.post('/api/stock/adjust', (req, res) => {
+  const { productId, newStock, notes, date } = req.body;
+  const row = db.prepare('SELECT * FROM stock_products WHERE id = ?').get(productId) as any;
+  if (!row) return res.status(404).json({ error: 'Product not found' });
+
+  const diff = newStock - row.current_stock;
+  const clamped = Math.max(0, newStock);
+  const now = Date.now();
+  db.prepare('UPDATE stock_products SET current_stock = ?, updated_at = ? WHERE id = ?')
+    .run(clamped, now, productId);
+
+  db.prepare(`
+    INSERT INTO stock_transactions (id, product_id, product_name, type, quantity, notes, date, created_at)
+    VALUES (?, ?, ?, 'adjustment', ?, ?, ?, ?)
+  `).run(
+    `tx-${now}-${Math.random().toString(36).slice(2)}`,
+    productId, row.name, diff,
+    notes || 'Manual stock adjustment',
+    date, now
+  );
+
+  res.json({ success: true });
+});
+
+// ── Deduct sales from stock ────────────────────────────────────────────────
+
+app.post('/api/stock/deduct-sales', (req, res) => {
+  const { sales, reportId, date } = req.body as {
+    sales: Array<{ itemName: string; quantitySold: number }>;
+    reportId: string;
+    date: string;
+  };
+
+  const products = (db.prepare('SELECT * FROM stock_products').all() as any[]).map(rowToProduct);
+  const deducted: Array<{ productName: string; deducted: number; unit: string }> = [];
+  const unmatched: string[] = [];
+
+  const updateStmt = db.prepare('UPDATE stock_products SET current_stock = ?, updated_at = ? WHERE id = ?');
+  const insertTx = db.prepare(`
+    INSERT INTO stock_transactions (id, product_id, product_name, type, quantity, notes, report_id, date, created_at)
+    VALUES (?, ?, ?, 'sale', ?, ?, ?, ?, ?)
+  `);
+
+  const deductAll = db.transaction(() => {
+    for (const sale of sales) {
+      const qty = Number(sale.quantitySold) || 0;
+      if (qty <= 0) continue;
+      const product = fuzzyFindProduct(products, sale.itemName);
+      if (product) {
+        const newStock = Math.max(0, product.currentStock - qty);
+        const now = Date.now();
+        updateStmt.run(newStock, now, product.id);
+        product.currentStock = newStock;
+        insertTx.run(
+          `tx-${now}-${Math.random().toString(36).slice(2)}`,
+          product.id, product.name, -qty,
+          `Auto-deducted: sold ${qty} ${product.unit} (from notes: "${sale.itemName}")`,
+          reportId, date, now
+        );
+        deducted.push({ productName: product.name, deducted: qty, unit: product.unit });
+      } else {
+        unmatched.push(sale.itemName);
+      }
+    }
+  });
+
+  deductAll();
+  res.json({ deducted, unmatched });
+});
+
+// ── Process AI restocks ────────────────────────────────────────────────────
+
+app.post('/api/stock/process-restocks', (req, res) => {
+  const { restocks, date } = req.body as {
+    restocks: Array<{ itemName: string; quantityReceived: number; unitCost?: number; notes?: string }>;
+    date: string;
+  };
+
+  const products = (db.prepare('SELECT * FROM stock_products').all() as any[]).map(rowToProduct);
+  const restocked: Array<{ productName: string; quantity: number; unit: string }> = [];
+  const unmatched: string[] = [];
+
+  const updateStmt = db.prepare('UPDATE stock_products SET current_stock = ?, unit_cost = ?, updated_at = ? WHERE id = ?');
+  const insertTx = db.prepare(`
+    INSERT INTO stock_transactions (id, product_id, product_name, type, quantity, unit_cost, notes, date, created_at)
+    VALUES (?, ?, ?, 'restock', ?, ?, ?, ?, ?)
+  `);
+
+  const processAll = db.transaction(() => {
+    for (const item of restocks) {
+      const qty = Number(item.quantityReceived) || 0;
+      if (qty <= 0) continue;
+      const product = fuzzyFindProduct(products, item.itemName);
+      if (product) {
+        const newStock = product.currentStock + qty;
+        const newCost = Number(item.unitCost) || product.unitCost;
+        const now = Date.now();
+        updateStmt.run(newStock, newCost, now, product.id);
+        product.currentStock = newStock;
+        insertTx.run(
+          `tx-${now}-${Math.random().toString(36).slice(2)}`,
+          product.id, product.name, qty, newCost,
+          item.notes || `Restocked ${qty} ${product.unit}`,
+          date, now
+        );
+        restocked.push({ productName: product.name, quantity: qty, unit: product.unit });
+      } else {
+        unmatched.push(item.itemName);
+      }
+    }
+  });
+
+  processAll();
+  res.json({ restocked, unmatched });
+});
+
+// ── Audio generation is not supported with a local Gemma 4 text model
 app.post('/api/generate-audio-summary', (req, res) => {
   res.status(501).json({
     error: 'Audio generation (TTS) is not supported with the local Gemma 4 model. This feature requires a cloud TTS service.',

@@ -29,11 +29,12 @@ export default function App() {
 
   useEffect(() => {
     // Load historical reports on mount
-    const saved = getSavedReports();
-    setReports(saved);
-    if (saved.length > 0 && !currentReport) {
-      setCurrentReport(saved[0]);
-    }
+    getSavedReports().then((saved) => {
+      setReports(saved);
+      if (saved.length > 0) {
+        setCurrentReport(saved[0]);
+      }
+    });
   }, []);
 
   const handleAnalyzeNotes = async (payload: {
@@ -47,7 +48,7 @@ export default function App() {
     setErrorMessage(null);
 
     try {
-      const stockProducts = getStockProducts();
+      const stockProducts = await getStockProducts();
       const res = await fetch('/api/analyze-ledger', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -105,11 +106,11 @@ export default function App() {
 
       setCurrentReport(newReport);
       // Automatically save new report to history
-      const updatedList = saveReport(newReport);
+      const updatedList = await saveReport(newReport);
       setReports(updatedList);
 
       // Auto-deduct sold quantities from stock catalogue
-      const { deducted, unmatched } = deductSalesFromStock(newReport.sales, newReport.id, newReport.date);
+      const { deducted, unmatched } = await deductSalesFromStock(newReport.sales, newReport.id, newReport.date);
       if (deducted.length > 0) {
         setStockDeductions(deducted);
         setTimeout(() => setStockDeductions([]), 6000);
@@ -122,7 +123,7 @@ export default function App() {
       // Auto-add restocked quantities detected in notes
       const aiRestocks = parsed.restocks || [];
       if (aiRestocks.length > 0) {
-        const { restocked, unmatched: unmatchedRestocks } = processAIRestocks(aiRestocks, newReport.date);
+        const { restocked, unmatched: unmatchedRestocks } = await processAIRestocks(aiRestocks, newReport.date);
         if (restocked.length > 0) {
           setStockRestocked(restocked);
           setTimeout(() => setStockRestocked([]), 7000);
@@ -141,14 +142,14 @@ export default function App() {
     }
   };
 
-  const handleUpdateCurrentReport = (updated: DailyLedgerReport) => {
+  const handleUpdateCurrentReport = async (updated: DailyLedgerReport) => {
     setCurrentReport(updated);
-    const updatedList = saveReport(updated);
+    const updatedList = await saveReport(updated);
     setReports(updatedList);
   };
 
-  const handleDeleteReport = (id: string) => {
-    const updatedList = deleteReport(id);
+  const handleDeleteReport = async (id: string) => {
+    const updatedList = await deleteReport(id);
     setReports(updatedList);
     if (currentReport?.id === id) {
       setCurrentReport(updatedList.length > 0 ? updatedList[0] : null);
@@ -251,8 +252,7 @@ export default function App() {
                 report={currentReport}
                 onUpdateReport={handleUpdateCurrentReport}
                 onSaveToHistory={(rep) => {
-                  const updated = saveReport(rep);
-                  setReports(updated);
+                  saveReport(rep).then((updated) => setReports(updated));
                 }}
                 onOpenWhatsAppExport={(rep) => setWhatsappModalReport(rep)}
               />
