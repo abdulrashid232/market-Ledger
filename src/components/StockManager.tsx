@@ -68,7 +68,7 @@ function StockStatusBadge({ product }: { product: StockProduct }) {
   const config = {
     out:      { label: 'Out of Stock',  cls: 'bg-red-100 text-red-800 border-red-200' },
     critical: { label: 'Critical',      cls: 'bg-orange-100 text-orange-800 border-orange-200' },
-    low:      { label: 'Low Stock',     cls: 'bg-amber-100 text-amber-800 border-amber-200' },
+    low:      { label: 'Low Stock',     cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
     ok:       { label: 'In Stock',      cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
   }[status];
   return (
@@ -82,7 +82,7 @@ function StockBar({ product }: { product: StockProduct }) {
   const status = getStockStatus(product);
   const max = Math.max(product.lowStockThreshold * 2, product.currentStock, 1);
   const pct = Math.min(100, (product.currentStock / max) * 100);
-  const color = { out: 'bg-red-500', critical: 'bg-orange-500', low: 'bg-amber-400', ok: 'bg-emerald-500' }[status];
+  const color = { out: 'bg-red-500', critical: 'bg-orange-500', low: 'bg-emerald-400', ok: 'bg-emerald-500' }[status];
   return (
     <div className="w-full h-1.5 bg-stone-100 rounded-full overflow-hidden mt-1">
       <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
@@ -225,7 +225,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
         <div className="bg-white p-5 rounded-2xl border border-stone-200/90 shadow-2xs">
           <div className="flex items-center justify-between text-xs font-semibold text-stone-500">
             <span>Total Products</span>
-            <Package className="w-4 h-4 text-amber-700" />
+            <Package className="w-4 h-4 text-emerald-700" />
           </div>
           <p className="text-2xl font-black text-stone-900 mt-2">{products.length}</p>
           <p className="text-xs text-stone-500 mt-1">in your catalogue</p>
@@ -243,9 +243,9 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
         <div className="bg-white p-5 rounded-2xl border border-stone-200/90 shadow-2xs">
           <div className="flex items-center justify-between text-xs font-semibold text-stone-500">
             <span>Low / Critical</span>
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <AlertTriangle className="w-4 h-4 text-emerald-600" />
           </div>
-          <p className="text-2xl font-black text-amber-700 mt-2">{lowCount}</p>
+          <p className="text-2xl font-black text-emerald-700 mt-2">{lowCount}</p>
           <p className="text-xs text-stone-500 mt-1">items need attention</p>
         </div>
 
@@ -261,8 +261,8 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
 
       {/* Alert Banner */}
       {lowCount > 0 && (
-        <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-center gap-3 text-sm text-amber-900">
-          <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+        <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-3 flex items-center gap-3 text-sm text-emerald-900">
+          <AlertTriangle className="w-4 h-4 text-emerald-700 shrink-0" />
           <span>
             <strong>{lowCount} product{lowCount > 1 ? 's' : ''}</strong> {lowCount > 1 ? 'are' : 'is'} at or below the low stock threshold. Restock before your next market day.
           </span>
@@ -274,19 +274,19 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
         <button
           onClick={() => setActiveTab('overview')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-            activeTab === 'overview' ? 'bg-amber-100 text-amber-950 border border-amber-200 shadow-2xs' : 'text-stone-600 hover:bg-stone-100'
+            activeTab === 'overview' ? 'bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-2xs' : 'text-stone-600 hover:bg-stone-100'
           }`}
         >
-          <Package className="w-4 h-4 text-amber-700" />
+          <Package className="w-4 h-4 text-emerald-700" />
           Stock Overview ({products.length})
         </button>
         <button
           onClick={() => setActiveTab('log')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-            activeTab === 'log' ? 'bg-amber-100 text-amber-950 border border-amber-200 shadow-2xs' : 'text-stone-600 hover:bg-stone-100'
+            activeTab === 'log' ? 'bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-2xs' : 'text-stone-600 hover:bg-stone-100'
           }`}
         >
-          <ClipboardList className="w-4 h-4 text-amber-700" />
+          <ClipboardList className="w-4 h-4 text-emerald-700" />
           Transaction Log ({transactions.length})
         </button>
       </div>
@@ -305,13 +305,13 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search products..."
-                  className="w-full pl-8 pr-3 py-2 text-xs border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500"
+                  className="w-full pl-8 pr-3 py-2 text-xs border border-stone-200 rounded-lg focus:outline-none focus:border-emerald-500"
                 />
               </div>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="text-xs border border-stone-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-amber-500 bg-white text-stone-700 font-medium"
+                className="text-xs border border-stone-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-emerald-500 bg-white text-stone-700 font-medium"
               >
                 <option value="all">All Status</option>
                 <option value="ok">In Stock</option>
@@ -322,7 +322,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
             </div>
             <button
               onClick={openAddModal}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               Add Product
@@ -337,7 +337,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
               <p className="text-xs text-stone-400">Click "Add Product" to build your inventory. Once added, quantities will be auto-deducted whenever you analyze a daily ledger.</p>
               <button
                 onClick={openAddModal}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all cursor-pointer mt-2"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer mt-2"
               >
                 <Plus className="w-4 h-4" />
                 Add First Product
@@ -357,7 +357,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                   <div
                     key={product.id}
                     className={`bg-white rounded-2xl border shadow-2xs p-5 space-y-4 transition-all ${
-                      status === 'out' ? 'border-red-200' : status === 'critical' ? 'border-orange-200' : status === 'low' ? 'border-amber-200' : 'border-stone-200/90'
+                      status === 'out' ? 'border-red-200' : status === 'critical' ? 'border-orange-200' : status === 'low' ? 'border-emerald-200' : 'border-stone-200/90'
                     }`}
                   >
                     {/* Product Header */}
@@ -375,7 +375,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                     <div>
                       <div className="flex items-end justify-between">
                         <div>
-                          <span className={`text-3xl font-black ${status === 'out' ? 'text-red-600' : status === 'critical' ? 'text-orange-600' : status === 'low' ? 'text-amber-700' : 'text-stone-900'}`}>
+                          <span className={`text-3xl font-black ${status === 'out' ? 'text-red-600' : status === 'critical' ? 'text-orange-600' : status === 'low' ? 'text-emerald-700' : 'text-stone-900'}`}>
                             {product.currentStock}
                           </span>
                           <span className="text-xs text-stone-500 ml-1.5 font-medium">{product.unit}</span>
@@ -505,7 +505,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                         </button>
                         <button
                           onClick={() => openEditModal(product)}
-                          className="p-1.5 rounded-lg text-stone-400 hover:text-amber-700 hover:bg-amber-50 border border-transparent hover:border-amber-200 transition-all cursor-pointer"
+                          className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 transition-all cursor-pointer"
                           title="Edit product"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -539,7 +539,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
         <div className="bg-white rounded-2xl border border-stone-200/90 shadow-2xs p-6 space-y-4">
           <div>
             <h3 className="font-bold text-stone-900 text-base flex items-center gap-2">
-              <ClipboardList className="w-5 h-5 text-amber-700" />
+              <ClipboardList className="w-5 h-5 text-emerald-700" />
               Stock Movement History
             </h3>
             <p className="text-xs text-stone-500 mt-1">All stock changes — sales deductions, restocks, and manual adjustments.</p>
@@ -614,7 +614,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g. Perfumed Rice Bags"
-                  className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500"
+                  className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
@@ -624,7 +624,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                   <select
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full text-xs border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500 bg-white"
+                    className="w-full text-xs border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-emerald-500 bg-white"
                   >
                     {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -634,7 +634,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                   <select
                     value={form.unit}
                     onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                    className="w-full text-xs border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500 bg-white"
+                    className="w-full text-xs border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-emerald-500 bg-white"
                   >
                     {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
                   </select>
@@ -650,7 +650,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                     value={form.currentStock}
                     onChange={(e) => setForm({ ...form, currentStock: e.target.value })}
                     placeholder="0"
-                    className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500"
+                    className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
@@ -661,7 +661,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                     value={form.lowStockThreshold}
                     onChange={(e) => setForm({ ...form, lowStockThreshold: e.target.value })}
                     placeholder="5"
-                    className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500"
+                    className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
@@ -675,7 +675,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                     value={form.unitCost}
                     onChange={(e) => setForm({ ...form, unitCost: e.target.value })}
                     placeholder="0.00"
-                    className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500"
+                    className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
@@ -686,7 +686,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
                     value={form.unitPrice}
                     onChange={(e) => setForm({ ...form, unitPrice: e.target.value })}
                     placeholder="0.00"
-                    className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500"
+                    className="w-full text-sm border border-stone-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
@@ -695,7 +695,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ selectedCurrency }) 
             <div className="flex gap-3 pt-2">
               <button
                 onClick={handleSaveProduct}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-white bg-amber-600 hover:bg-amber-700 transition-all text-sm cursor-pointer"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all text-sm cursor-pointer"
               >
                 <CheckCircle className="w-4 h-4" />
                 {editingProduct ? 'Save Changes' : 'Add Product'}

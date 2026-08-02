@@ -19,7 +19,7 @@ export const WhatsAppExportModal: React.FC<WhatsAppExportModalProps> = ({
   const currency = report.currency || 'GHS';
 
   // Construct formatted plain text report for WhatsApp / SMS
-  const formattedText = `📊 *MARKET VENDOR DAILY REPORT* (${report.date})
+  const formattedText = `📊 *SIKA DWA DAILY REPORT* (${report.date})
 *Vendor:* ${report.vendorName || 'Vendor'} | *Stall:* ${report.businessType || 'Market Stall'}
 
 💰 *FINANCIAL SUMMARY*

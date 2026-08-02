@@ -161,7 +161,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-100/70 text-stone-900 flex flex-col font-sans selection:bg-amber-200">
+    <div className="min-h-screen bg-emerald-50/50 text-stone-900 flex flex-col font-sans selection:bg-emerald-200">
       
       {/* Top Navbar */}
       <Navbar
@@ -203,15 +203,15 @@ export default function App() {
 
       {/* Unmatched items warning */}
       {stockUnmatched.length > 0 && (
-        <div className={`fixed z-50 bg-amber-900 text-amber-100 rounded-2xl shadow-xl p-4 max-w-sm space-y-1 border border-amber-700 ${stockDeductions.length > 0 ? 'bottom-6 left-6' : 'bottom-6 right-6'}`}>
+        <div className={`fixed z-50 bg-emerald-900 text-emerald-100 rounded-2xl shadow-xl p-4 max-w-sm space-y-1 border border-emerald-700 ${stockDeductions.length > 0 ? 'bottom-6 left-6' : 'bottom-6 right-6'}`}>
           <p className="text-xs font-bold flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-amber-400" />
+            <AlertCircle className="w-4 h-4 text-emerald-400" />
             Items sold but not in stock catalogue:
           </p>
           {stockUnmatched.map((name, i) => (
-            <p key={i} className="text-xs text-amber-300">— {name}</p>
+            <p key={i} className="text-xs text-emerald-300">— {name}</p>
           ))}
-          <p className="text-[10px] text-amber-400 pt-1 border-t border-amber-800">
+          <p className="text-[10px] text-emerald-400 pt-1 border-t border-emerald-800">
             Go to Stock tab → Add Product to track these items.
           </p>
         </div>
@@ -316,12 +316,12 @@ export default function App() {
       <footer className="bg-white border-t border-stone-200 py-6 text-center text-xs text-stone-500 mt-auto">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
-            <Store className="w-4 h-4 text-amber-700" />
-            <span className="font-bold text-stone-800">Market Vendor Daily Ledger</span>
+            <Store className="w-4 h-4 text-emerald-700" />
+            <span className="font-bold text-stone-800">Sika Dwa</span>
             <span>• Powered by Gemma 4 (Local AI)</span>
           </div>
           <p className="text-stone-400">
-            Empowering small local business owners and market vendors with instant bookkeeping.
+            Sika Dwa — empowering market vendors with instant AI bookkeeping.
           </p>
         </div>
       </footer>

@@ -1,6 +1,6 @@
 {
-  "name": "Market Vendor Daily Ledger",
-  "description": "AI-powered daily ledger converting raw, unstructured vendor notes into structured revenue summaries, inventory checklists, customer feedback analysis, and actionable business insights.",
+  "name": "Sika Dwa",
+  "description": "Sika Dwa — AI-powered market ledger for Ghanaian and West African vendors. Converts raw daily notes into structured revenue summaries, inventory checklists, customer feedback analysis, and actionable business insights.",
   "requestFramePermissions": [
     "microphone"
   ],

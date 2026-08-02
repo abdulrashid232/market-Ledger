@@ -104,7 +104,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         <div className="bg-white p-5 rounded-2xl border border-stone-200/90 shadow-2xs">
           <div className="flex items-center justify-between text-xs font-semibold text-stone-500">
             <span>Net Accumulated Profit</span>
-            <DollarSign className="w-4 h-4 text-amber-600" />
+            <DollarSign className="w-4 h-4 text-emerald-600" />
           </div>
           <p className={`text-2xl font-black mt-2 ${totalNetProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
             {formatMoney(totalNetProfit, selectedCurrency)}
@@ -117,7 +117,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         <div className="bg-white p-5 rounded-2xl border border-stone-200/90 shadow-2xs">
           <div className="flex items-center justify-between text-xs font-semibold text-stone-500">
             <span>Logged Reports</span>
-            <Calendar className="w-4 h-4 text-amber-700" />
+            <Calendar className="w-4 h-4 text-emerald-700" />
           </div>
           <p className="text-2xl font-black text-stone-900 mt-2">
             {reports.length}
@@ -134,7 +134,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           {/* Revenue & Expense Bar Chart (2 cols) */}
           <div className="lg:col-span-2 bg-white rounded-2xl border border-stone-200/90 p-5 shadow-2xs space-y-4">
             <h3 className="font-bold text-stone-900 text-sm flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-amber-700" />
+              <BarChart3 className="w-4 h-4 text-emerald-700" />
               Daily Revenue vs Expense Trends
             </h3>
 
@@ -158,7 +158,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           {/* Sales Category Distribution Pie Chart (1 col) */}
           <div className="bg-white rounded-2xl border border-stone-200/90 p-5 shadow-2xs space-y-4">
             <h3 className="font-bold text-stone-900 text-sm flex items-center gap-2">
-              <Package className="w-4 h-4 text-amber-700" />
+              <Package className="w-4 h-4 text-emerald-700" />
               Revenue by Product Category
             </h3>
 
@@ -193,7 +193,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-100">
           <div>
             <h3 className="text-base font-bold text-stone-900 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-amber-700" />
+              <FileText className="w-5 h-5 text-emerald-700" />
               Saved Historical Daily Ledgers
             </h3>
             <p className="text-xs text-stone-500">Click any report to view or edit full details</p>
@@ -204,7 +204,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search date, vendor or notes..."
-            className="px-3 py-1.5 rounded-lg border border-stone-200 text-xs w-full sm:w-64 focus:outline-none focus:border-amber-500"
+            className="px-3 py-1.5 rounded-lg border border-stone-200 text-xs w-full sm:w-64 focus:outline-none focus:border-emerald-500"
           />
         </div>
 
@@ -217,7 +217,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             {filteredReports.map((r) => (
               <div
                 key={r.id}
-                className="p-4 rounded-xl border border-stone-200 hover:border-amber-300 bg-white hover:bg-amber-50/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs"
+                className="p-4 rounded-xl border border-stone-200 hover:border-emerald-300 bg-white hover:bg-emerald-50/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs"
               >
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
@@ -228,7 +228,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-xs font-semibold text-amber-900">{r.summaryHeadline}</p>
+                  <p className="text-xs font-semibold text-emerald-900">{r.summaryHeadline}</p>
                   <p className="text-[11px] text-stone-500 line-clamp-1 italic">"{r.rawNotes}"</p>
                 </div>
 
@@ -245,7 +245,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => onSelectReport(r)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-amber-950 hover:bg-amber-400 cursor-pointer transition-all shadow-2xs"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-emerald-950 hover:bg-emerald-400 cursor-pointer transition-all shadow-2xs"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>View</span>

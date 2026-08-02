@@ -256,8 +256,8 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between pb-5 mb-5 border-b border-stone-100 gap-4">
         <div>
           <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-            <span className="p-1.5 bg-amber-100 text-amber-900 rounded-lg">
-              <Zap className="w-5 h-5 text-amber-700" />
+            <span className="p-1.5 bg-emerald-100 text-emerald-900 rounded-lg">
+              <Zap className="w-5 h-5 text-emerald-700" />
             </span>
             Enter Raw End-of-Day Vendor Notes
           </h2>
@@ -304,14 +304,14 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
 
       {/* Dictation Notice Banner */}
       {dictationNotice && (
-        <div className="mb-4 p-3 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 flex items-start justify-between">
+        <div className="mb-4 p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-900 flex items-start justify-between">
           <div className="flex items-start space-x-2">
-            <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+            <AlertCircle className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
             <span>{dictationNotice}</span>
           </div>
           <button
             onClick={() => setDictationNotice(null)}
-            className="text-amber-800 font-bold ml-2 hover:underline text-[11px]"
+            className="text-emerald-800 font-bold ml-2 hover:underline text-[11px]"
           >
             Dismiss
           </button>
@@ -319,16 +319,16 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
       )}
 
       {/* Multilingual Voice Dictation Toolbar */}
-      <div className="mb-4 bg-amber-50/70 border border-amber-200/90 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="mb-4 bg-emerald-50/70 border border-emerald-200/90 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         
         {/* Language Selector */}
         <div className="flex items-center space-x-2">
-          <Globe className="w-4 h-4 text-amber-800 shrink-0" />
-          <span className="text-xs font-bold text-amber-950">Dictation Language:</span>
+          <Globe className="w-4 h-4 text-emerald-800 shrink-0" />
+          <span className="text-xs font-bold text-emerald-950">Dictation Language:</span>
           <select
             value={selectedLang}
             onChange={(e) => setSelectedLang(e.target.value)}
-            className="bg-white border border-amber-300 rounded-lg px-2.5 py-1 text-xs font-bold text-amber-900 focus:outline-none cursor-pointer shadow-2xs"
+            className="bg-white border border-emerald-300 rounded-lg px-2.5 py-1 text-xs font-bold text-emerald-900 focus:outline-none cursor-pointer shadow-2xs"
           >
             <option value="twi">🇬🇭 Twi (Akan)</option>
             <option value="hausa">🇳🇬/🇬🇭 Hausa</option>
@@ -347,7 +347,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
               type="button"
               onClick={startAudioRecording}
               disabled={isTranscribingAudio || isAnalyzing}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-2xs cursor-pointer transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs cursor-pointer transition-all disabled:opacity-50"
             >
               <Mic className="w-4 h-4 text-white" />
               <span>Record Voice Note (Multilingual AI)</span>
@@ -374,7 +374,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
                   : 'bg-white border border-stone-200 text-stone-800 hover:bg-stone-50'
               }`}
             >
-              {isBrowserDictating ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5 text-amber-700" />}
+              {isBrowserDictating ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5 text-emerald-700" />}
               <span>{isBrowserDictating ? 'Listening...' : 'Browser Dictate'}</span>
             </button>
           )}
@@ -384,8 +384,8 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
 
       {/* Audio Transcription Spinner Status */}
       {isTranscribingAudio && (
-        <div className="mb-4 p-3 bg-amber-100/90 border border-amber-300 rounded-xl text-xs font-bold text-amber-950 flex items-center space-x-2 animate-pulse">
-          <Loader2 className="w-4 h-4 text-amber-800 animate-spin" />
+        <div className="mb-4 p-3 bg-emerald-100/90 border border-emerald-300 rounded-xl text-xs font-bold text-emerald-950 flex items-center space-x-2 animate-pulse">
+          <Loader2 className="w-4 h-4 text-emerald-800 animate-spin" />
           <span>
             Transcribing & translating your spoken <strong>{selectedLang.toUpperCase()}</strong> recording into clear English vendor notes...
           </span>
@@ -403,9 +403,9 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
               key={preset.id}
               type="button"
               onClick={() => handleLoadPreset(preset)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-amber-50 text-amber-900 border border-amber-200/80 hover:bg-amber-100 hover:border-amber-300 transition-all cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-900 border border-emerald-200/80 hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer shadow-2xs"
             >
-              <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
+              <Sparkles className="w-3 h-3 text-emerald-600 shrink-0" />
               <span><strong>{preset.vendorName}</strong> ({preset.businessType})</span>
             </button>
           ))}
@@ -421,7 +421,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
             disabled={isAnalyzing}
             rows={5}
             placeholder={`e.g. "Sold 10 bags of rice at 480 GHC each, customer complained tomatoes were too soft, made 5,120 GHC, paid 80 GHC for transport, need to restock 15 bags rice and oil..." (or dictate in Twi / Hausa / Dagbani above)`}
-            className="w-full rounded-xl border border-stone-300 bg-stone-50/50 p-4 text-stone-900 placeholder-stone-400 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none text-base leading-relaxed transition-all resize-y"
+            className="w-full rounded-xl border border-stone-300 bg-stone-50/50 p-4 text-stone-900 placeholder-stone-400 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none text-base leading-relaxed transition-all resize-y"
           />
 
           {notes && (
@@ -440,32 +440,32 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
 
         {/* Progress Indicator when analyzing */}
         {isAnalyzing && (
-          <div className="mt-5 p-4 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-950 space-y-3">
+          <div className="mt-5 p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-sm flex items-center gap-2">
-                <Loader2 className="w-4 h-4 text-amber-700 animate-spin" />
+                <Loader2 className="w-4 h-4 text-emerald-700 animate-spin" />
                 Gemma 4 is structuring your daily notes...
               </span>
-              <span className="text-xs font-semibold text-amber-800 bg-amber-200/80 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-semibold text-emerald-800 bg-emerald-200/80 px-2 py-0.5 rounded-full">
                 Step {analysisStep} of 4
               </span>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-              <div className={`p-2 rounded-lg border flex items-center gap-1.5 ${analysisStep >= 1 ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-stone-100 text-stone-400 border-stone-200'}`}>
-                <CheckCircle2 className={`w-3.5 h-3.5 ${analysisStep >= 1 ? 'text-amber-700' : 'text-stone-300'}`} />
+              <div className={`p-2 rounded-lg border flex items-center gap-1.5 ${analysisStep >= 1 ? 'bg-emerald-100 border-emerald-300 text-emerald-900' : 'bg-stone-100 text-stone-400 border-stone-200'}`}>
+                <CheckCircle2 className={`w-3.5 h-3.5 ${analysisStep >= 1 ? 'text-emerald-700' : 'text-stone-300'}`} />
                 <span>1. Parsing Sales & Costs</span>
               </div>
-              <div className={`p-2 rounded-lg border flex items-center gap-1.5 ${analysisStep >= 2 ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-stone-100 text-stone-400 border-stone-200'}`}>
-                <CheckCircle2 className={`w-3.5 h-3.5 ${analysisStep >= 2 ? 'text-amber-700' : 'text-stone-300'}`} />
+              <div className={`p-2 rounded-lg border flex items-center gap-1.5 ${analysisStep >= 2 ? 'bg-emerald-100 border-emerald-300 text-emerald-900' : 'bg-stone-100 text-stone-400 border-stone-200'}`}>
+                <CheckCircle2 className={`w-3.5 h-3.5 ${analysisStep >= 2 ? 'text-emerald-700' : 'text-stone-300'}`} />
                 <span>2. Inventory & Restock</span>
               </div>
-              <div className={`p-2 rounded-lg border flex items-center gap-1.5 ${analysisStep >= 3 ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-stone-100 text-stone-400 border-stone-200'}`}>
-                <CheckCircle2 className={`w-3.5 h-3.5 ${analysisStep >= 3 ? 'text-amber-700' : 'text-stone-300'}`} />
+              <div className={`p-2 rounded-lg border flex items-center gap-1.5 ${analysisStep >= 3 ? 'bg-emerald-100 border-emerald-300 text-emerald-900' : 'bg-stone-100 text-stone-400 border-stone-200'}`}>
+                <CheckCircle2 className={`w-3.5 h-3.5 ${analysisStep >= 3 ? 'text-emerald-700' : 'text-stone-300'}`} />
                 <span>3. Customer Intelligence</span>
               </div>
-              <div className={`p-2 rounded-lg border flex items-center gap-1.5 ${analysisStep >= 4 ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-stone-100 text-stone-400 border-stone-200'}`}>
-                <CheckCircle2 className={`w-3.5 h-3.5 ${analysisStep >= 4 ? 'text-amber-700' : 'text-stone-300'}`} />
+              <div className={`p-2 rounded-lg border flex items-center gap-1.5 ${analysisStep >= 4 ? 'bg-emerald-100 border-emerald-300 text-emerald-900' : 'bg-stone-100 text-stone-400 border-stone-200'}`}>
+                <CheckCircle2 className={`w-3.5 h-3.5 ${analysisStep >= 4 ? 'text-emerald-700' : 'text-stone-300'}`} />
                 <span>4. Business Insights</span>
               </div>
             </div>
@@ -481,7 +481,7 @@ export const NoteInputSection: React.FC<NoteInputSectionProps> = ({
           <button
             type="submit"
             disabled={!notes.trim() || isAnalyzing}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all text-sm cursor-pointer"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all text-sm cursor-pointer"
           >
             {isAnalyzing ? (
               <>

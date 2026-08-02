@@ -132,24 +132,24 @@ export const SetupGuide: React.FC = () => {
     <div className="space-y-6 max-w-4xl">
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-amber-900 via-stone-900 to-amber-950 text-stone-100 rounded-2xl p-6 border border-amber-800/80">
+      <div className="bg-gradient-to-br from-emerald-900 via-stone-900 to-emerald-950 text-stone-100 rounded-2xl p-6 border border-emerald-800/80">
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-amber-500/20 rounded-xl border border-amber-500/30 shrink-0">
-            <Cpu className="w-7 h-7 text-amber-400" />
+          <div className="p-3 bg-emerald-500/20 rounded-xl border border-emerald-500/30 shrink-0">
+            <Cpu className="w-7 h-7 text-emerald-400" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-amber-100">Run Gemma 4 Locally</h2>
-            <p className="text-sm text-amber-200/80 mt-1">
+            <h2 className="text-xl font-black text-emerald-100">Run Gemma 4 Locally</h2>
+            <p className="text-sm text-emerald-200/80 mt-1">
               This app uses <strong>Gemma 4 E2B</strong> — Google's powerful AI model running entirely on your own computer via LM Studio. Your vendor data never leaves your device.
             </p>
             <div className="flex flex-wrap gap-3 mt-3 text-xs">
-              <span className="flex items-center gap-1.5 text-amber-300/80">
+              <span className="flex items-center gap-1.5 text-emerald-300/80">
                 <HardDrive className="w-3.5 h-3.5" /> 4.4 GB model size
               </span>
-              <span className="flex items-center gap-1.5 text-amber-300/80">
+              <span className="flex items-center gap-1.5 text-emerald-300/80">
                 <Cpu className="w-3.5 h-3.5" /> 8 GB RAM recommended
               </span>
-              <span className="flex items-center gap-1.5 text-amber-300/80">
+              <span className="flex items-center gap-1.5 text-emerald-300/80">
                 <WifiOff className="w-3.5 h-3.5" /> 100% offline after setup
               </span>
             </div>
@@ -162,7 +162,7 @@ export const SetupGuide: React.FC = () => {
         isFullyReady
           ? 'bg-emerald-50 border-emerald-300'
           : status?.connected
-          ? 'bg-amber-50 border-amber-300'
+          ? 'bg-emerald-50 border-emerald-300'
           : 'bg-rose-50 border-rose-200'
       }`}>
         <div className="flex items-center justify-between">
@@ -172,7 +172,7 @@ export const SetupGuide: React.FC = () => {
             ) : isFullyReady ? (
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             ) : status?.connected ? (
-              <AlertTriangle className="w-5 h-5 text-amber-600" />
+              <AlertTriangle className="w-5 h-5 text-emerald-600" />
             ) : (
               <XCircle className="w-5 h-5 text-rose-500" />
             )}
@@ -220,7 +220,7 @@ export const SetupGuide: React.FC = () => {
             </div>
             <div className="bg-white/70 rounded-xl p-3">
               <p className="text-[10px] font-bold text-stone-500 uppercase">Model Status</p>
-              <p className={`text-xs font-bold mt-0.5 ${status.modelLoaded ? 'text-emerald-700' : status.connected ? 'text-amber-700' : 'text-rose-600'}`}>
+              <p className={`text-xs font-bold mt-0.5 ${status.modelLoaded ? 'text-emerald-700' : status.connected ? 'text-emerald-700' : 'text-rose-600'}`}>
                 {status.modelLoaded ? 'Loaded & Ready' : status.connected ? 'Not Loaded' : 'Unreachable'}
               </p>
             </div>
@@ -253,7 +253,7 @@ export const SetupGuide: React.FC = () => {
       {/* Step-by-step Guide */}
       <div className="space-y-4">
         <h3 className="font-bold text-stone-900 text-base flex items-center gap-2">
-          <Server className="w-5 h-5 text-amber-700" />
+          <Server className="w-5 h-5 text-emerald-700" />
           Setup Instructions
         </h3>
 
@@ -267,7 +267,7 @@ export const SetupGuide: React.FC = () => {
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shadow-sm ${
                   isLast && isFullyReady
                     ? 'bg-emerald-500 text-white'
-                    : 'bg-amber-600 text-white'
+                    : 'bg-emerald-600 text-white'
                 }`}>
                   {isLast && isFullyReady ? <CheckCircle2 className="w-5 h-5" /> : step.num}
                 </div>
@@ -279,8 +279,8 @@ export const SetupGuide: React.FC = () => {
               {/* Step content */}
               <div className={`bg-white rounded-2xl border border-stone-200/90 shadow-2xs p-5 flex-1 space-y-3 ${idx < STEPS.length - 1 ? 'mb-0' : ''}`}>
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-amber-100 rounded-lg shrink-0">
-                    <Icon className="w-4 h-4 text-amber-800" />
+                  <div className="p-2 bg-emerald-100 rounded-lg shrink-0">
+                    <Icon className="w-4 h-4 text-emerald-800" />
                   </div>
                   <div>
                     <h4 className="font-bold text-stone-900 text-sm">{step.title}</h4>
@@ -305,7 +305,7 @@ export const SetupGuide: React.FC = () => {
                     href={step.action.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition-all shadow-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     {step.action.label}
@@ -313,8 +313,8 @@ export const SetupGuide: React.FC = () => {
                   </a>
                 )}
 
-                <div className="flex items-start gap-2 text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 text-xs text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                   <span>{step.tip}</span>
                 </div>
               </div>
@@ -326,7 +326,7 @@ export const SetupGuide: React.FC = () => {
       {/* System Requirements */}
       <div className="bg-white rounded-2xl border border-stone-200/90 shadow-2xs p-5 space-y-4">
         <h3 className="font-bold text-stone-900 text-sm flex items-center gap-2">
-          <Cpu className="w-4 h-4 text-amber-700" />
+          <Cpu className="w-4 h-4 text-emerald-700" />
           Minimum System Requirements
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -339,7 +339,7 @@ export const SetupGuide: React.FC = () => {
             return (
               <div key={req.label} className="bg-stone-50 rounded-xl p-4 border border-stone-100">
                 <div className="flex items-center gap-2 mb-2">
-                  <Icon className="w-4 h-4 text-amber-700" />
+                  <Icon className="w-4 h-4 text-emerald-700" />
                   <span className="text-xs font-bold text-stone-700 uppercase tracking-wide">{req.label}</span>
                 </div>
                 <p className="text-sm font-black text-stone-900">{req.value}</p>

@@ -155,11 +155,11 @@ export const ReportView: React.FC<ReportViewProps> = ({
     <div className="space-y-6">
       
       {/* Executive Summary Card Banner */}
-      <div className="bg-gradient-to-br from-amber-900 via-stone-900 to-amber-950 text-stone-100 rounded-2xl p-6 shadow-md border border-amber-800/80">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-amber-800/60 gap-4">
+      <div className="bg-gradient-to-br from-emerald-900 via-stone-900 to-emerald-950 text-stone-100 rounded-2xl p-6 shadow-md border border-emerald-800/80">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-emerald-800/60 gap-4">
           <div>
             <div className="flex items-center space-x-2">
-              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">
+              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">
                 Daily Report • {report.date}
               </span>
               {report.vendorName && (
@@ -168,7 +168,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
                 </span>
               )}
             </div>
-            <h2 className="text-2xl font-black text-amber-100 mt-2 tracking-tight">
+            <h2 className="text-2xl font-black text-emerald-100 mt-2 tracking-tight">
               {report.summaryHeadline}
             </h2>
           </div>
@@ -178,10 +178,10 @@ export const ReportView: React.FC<ReportViewProps> = ({
             <button
               onClick={handlePlayAudioDebrief}
               disabled={isPlayingAudio}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 cursor-pointer transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/40 cursor-pointer transition-all"
               title="Listen to Audio Debrief"
             >
-              <Volume2 className={`w-4 h-4 ${isPlayingAudio ? 'animate-bounce text-amber-400' : ''}`} />
+              <Volume2 className={`w-4 h-4 ${isPlayingAudio ? 'animate-bounce text-emerald-400' : ''}`} />
               <span>{isPlayingAudio ? 'Playing Debrief...' : 'Listen Audio Summary'}</span>
             </button>
 
@@ -195,7 +195,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
 
             <button
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 text-amber-950 hover:bg-amber-400 cursor-pointer transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-emerald-950 hover:bg-emerald-400 cursor-pointer transition-all shadow-sm"
             >
               {isSaved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
               <span>{isSaved ? 'Saved to History!' : 'Save Ledger'}</span>
@@ -206,7 +206,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
         {/* 4 Key Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-5">
           
-          <div className="bg-amber-950/60 border border-amber-800/60 p-4 rounded-xl">
+          <div className="bg-emerald-950/60 border border-emerald-800/60 p-4 rounded-xl">
             <div className="flex items-center justify-between text-stone-400 text-xs font-semibold">
               <span>Total Revenue</span>
               <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -219,7 +219,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
             </p>
           </div>
 
-          <div className="bg-amber-950/60 border border-amber-800/60 p-4 rounded-xl">
+          <div className="bg-emerald-950/60 border border-emerald-800/60 p-4 rounded-xl">
             <div className="flex items-center justify-between text-stone-400 text-xs font-semibold">
               <span>Total Expenses</span>
               <TrendingDown className="w-4 h-4 text-rose-400" />
@@ -232,12 +232,12 @@ export const ReportView: React.FC<ReportViewProps> = ({
             </p>
           </div>
 
-          <div className="bg-amber-950/60 border border-amber-800/60 p-4 rounded-xl">
+          <div className="bg-emerald-950/60 border border-emerald-800/60 p-4 rounded-xl">
             <div className="flex items-center justify-between text-stone-400 text-xs font-semibold">
               <span>Net Profit</span>
-              <DollarSign className="w-4 h-4 text-amber-400" />
+              <DollarSign className="w-4 h-4 text-emerald-400" />
             </div>
-            <p className={`text-2xl font-black mt-1 ${report.netProfit >= 0 ? 'text-amber-300' : 'text-rose-400'}`}>
+            <p className={`text-2xl font-black mt-1 ${report.netProfit >= 0 ? 'text-emerald-300' : 'text-rose-400'}`}>
               {formatMoney(report.netProfit, currency)}
             </p>
             <p className="text-[11px] text-stone-400 mt-0.5">
@@ -247,7 +247,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
             </p>
           </div>
 
-          <div className="bg-amber-950/60 border border-amber-800/60 p-4 rounded-xl">
+          <div className="bg-emerald-950/60 border border-emerald-800/60 p-4 rounded-xl">
             <div className="flex items-center justify-between text-stone-400 text-xs font-semibold">
               <span>Restock Alerts</span>
               <Package className="w-4 h-4 text-orange-400" />
@@ -269,7 +269,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
           onClick={() => setActiveSubTab('sales')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
             activeSubTab === 'sales'
-              ? 'bg-amber-100 text-amber-950 border border-amber-200 shadow-2xs'
+              ? 'bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-2xs'
               : 'text-stone-600 hover:bg-stone-100'
           }`}
         >
@@ -281,7 +281,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
           onClick={() => setActiveSubTab('inventory')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
             activeSubTab === 'inventory'
-              ? 'bg-amber-100 text-amber-950 border border-amber-200 shadow-2xs'
+              ? 'bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-2xs'
               : 'text-stone-600 hover:bg-stone-100'
           }`}
         >
@@ -293,7 +293,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
           onClick={() => setActiveSubTab('feedback')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
             activeSubTab === 'feedback'
-              ? 'bg-amber-100 text-amber-950 border border-amber-200 shadow-2xs'
+              ? 'bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-2xs'
               : 'text-stone-600 hover:bg-stone-100'
           }`}
         >
@@ -305,11 +305,11 @@ export const ReportView: React.FC<ReportViewProps> = ({
           onClick={() => setActiveSubTab('insights')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
             activeSubTab === 'insights'
-              ? 'bg-amber-100 text-amber-950 border border-amber-200 shadow-2xs'
+              ? 'bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-2xs'
               : 'text-stone-600 hover:bg-stone-100'
           }`}
         >
-          <Lightbulb className="w-4 h-4 text-amber-600" />
+          <Lightbulb className="w-4 h-4 text-emerald-600" />
           <span>AI Business Advice ({report.insights.length})</span>
         </button>
 
@@ -317,7 +317,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
           onClick={() => setActiveSubTab('tasks')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
             activeSubTab === 'tasks'
-              ? 'bg-amber-100 text-amber-950 border border-amber-200 shadow-2xs'
+              ? 'bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-2xs'
               : 'text-stone-600 hover:bg-stone-100'
           }`}
         >
@@ -363,7 +363,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {report.sales.map((sale) => (
-                    <tr key={sale.id} className="hover:bg-amber-50/50 transition-colors">
+                    <tr key={sale.id} className="hover:bg-emerald-50/50 transition-colors">
                       <td className="py-3 px-3 font-semibold text-stone-900">
                         {sale.itemName}
                         {sale.notes && <p className="text-[11px] text-stone-500 font-normal">{sale.notes}</p>}
@@ -468,7 +468,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
               </button>
               <button
                 onClick={() => setInventoryFilter('low')}
-                className={`px-3 py-1 rounded-lg font-semibold transition-all ${inventoryFilter === 'low' ? 'bg-amber-500 text-white shadow-2xs' : 'text-stone-600'}`}
+                className={`px-3 py-1 rounded-lg font-semibold transition-all ${inventoryFilter === 'low' ? 'bg-emerald-500 text-white shadow-2xs' : 'text-stone-600'}`}
               >
                 Low Stock
               </button>
@@ -484,7 +484,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
                 badgeColor = 'bg-rose-50 text-rose-800 border-rose-200';
                 badgeLabel = 'Restock Needed';
               } else if (item.status === 'low_stock') {
-                badgeColor = 'bg-amber-50 text-amber-800 border-amber-200';
+                badgeColor = 'bg-emerald-50 text-emerald-800 border-emerald-200';
                 badgeLabel = 'Low Stock';
               } else if (item.status === 'spoiled_damaged') {
                 badgeColor = 'bg-purple-50 text-purple-800 border-purple-200';
@@ -498,14 +498,14 @@ export const ReportView: React.FC<ReportViewProps> = ({
                   className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start space-x-3 ${
                     item.checked
                       ? 'bg-stone-50 border-stone-200 opacity-60 line-through'
-                      : 'bg-white border-stone-200 hover:border-amber-300 shadow-2xs'
+                      : 'bg-white border-stone-200 hover:border-emerald-300 shadow-2xs'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={!!item.checked}
                     onChange={() => {}}
-                    className="mt-1 w-4 h-4 rounded text-amber-600 focus:ring-amber-400 cursor-pointer"
+                    className="mt-1 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-400 cursor-pointer"
                   />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
@@ -556,7 +556,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
                 let catBadge = 'bg-stone-100 text-stone-800';
                 if (fb.category === 'complaint') catBadge = 'bg-rose-100 text-rose-800';
                 if (fb.category === 'praise') catBadge = 'bg-emerald-100 text-emerald-800';
-                if (fb.category === 'price_concern') catBadge = 'bg-amber-100 text-amber-800';
+                if (fb.category === 'price_concern') catBadge = 'bg-emerald-100 text-emerald-800';
 
                 return (
                   <div key={fb.id} className="p-4 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
@@ -575,8 +575,8 @@ export const ReportView: React.FC<ReportViewProps> = ({
 
                     <div className="pt-2 border-t border-stone-200/80">
                       <span className="text-[10px] font-bold text-stone-500 uppercase block">Suggested Vendor Action:</span>
-                      <p className="text-xs font-medium text-amber-900 mt-0.5 flex items-start gap-1">
-                        <ArrowUpRight className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
+                      <p className="text-xs font-medium text-emerald-900 mt-0.5 flex items-start gap-1">
+                        <ArrowUpRight className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
                         <span>{fb.suggestedAction}</span>
                       </p>
                     </div>
@@ -593,7 +593,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
         <div className="bg-white rounded-2xl border border-stone-200/90 shadow-sm p-6 space-y-5">
           <div>
             <h3 className="text-lg font-bold text-stone-900 flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-amber-600" />
+              <Lightbulb className="w-5 h-5 text-emerald-600" />
               Actionable Business Advice & Growth Tips
             </h3>
             <p className="text-xs text-stone-600 mt-1">
@@ -605,10 +605,10 @@ export const ReportView: React.FC<ReportViewProps> = ({
             {report.insights.map((ins) => (
               <div
                 key={ins.id}
-                className="p-5 rounded-2xl border border-amber-200/90 bg-gradient-to-br from-amber-50/60 to-orange-50/30 space-y-2 shadow-2xs"
+                className="p-5 rounded-2xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50/60 to-orange-50/30 space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-950 uppercase">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-200 text-emerald-950 uppercase">
                     {ins.category}
                   </span>
                   <span className="text-[10px] font-bold text-stone-500 uppercase">
@@ -663,7 +663,7 @@ export const ReportView: React.FC<ReportViewProps> = ({
                     task.priority === 'high'
                       ? 'bg-rose-100 text-rose-800'
                       : task.priority === 'medium'
-                      ? 'bg-amber-100 text-amber-800'
+                      ? 'bg-emerald-100 text-emerald-800'
                       : 'bg-stone-100 text-stone-700'
                   }`}
                 >

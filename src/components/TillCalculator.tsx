@@ -52,8 +52,8 @@ export const TillCalculator: React.FC<TillCalculatorProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-100 gap-3">
         <div>
           <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-            <span className="p-1.5 bg-amber-100 text-amber-900 rounded-lg">
-              <Calculator className="w-5 h-5 text-amber-700" />
+            <span className="p-1.5 bg-emerald-100 text-emerald-900 rounded-lg">
+              <Calculator className="w-5 h-5 text-emerald-700" />
             </span>
             Cash Till & Drawer Reconciliation
           </h2>
@@ -103,7 +103,7 @@ export const TillCalculator: React.FC<TillCalculatorProps> = ({
           Math.abs(discrepancy) < 0.01
             ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
             : discrepancy > 0
-            ? 'bg-amber-50 border-amber-200 text-amber-950'
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
             : 'bg-rose-50 border-rose-200 text-rose-950'
         }`}>
           <label className="block text-[11px] font-bold uppercase tracking-wider opacity-80">
@@ -118,7 +118,7 @@ export const TillCalculator: React.FC<TillCalculatorProps> = ({
                 <CheckCircle2 className="w-3.5 h-3.5" /> Perfect Match
               </span>
             ) : discrepancy > 0 ? (
-              <span className="text-xs font-bold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-bold bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full">
                 Surplus Cash
               </span>
             ) : (
@@ -169,12 +169,12 @@ export const TillCalculator: React.FC<TillCalculatorProps> = ({
                     value={count || ''}
                     onChange={(e) => handleCountChange(denom, parseInt(e.target.value) || 0)}
                     placeholder="0"
-                    className="w-12 text-center font-bold text-sm bg-white border border-stone-300 rounded-lg py-1 focus:outline-none focus:border-amber-500"
+                    className="w-12 text-center font-bold text-sm bg-white border border-stone-300 rounded-lg py-1 focus:outline-none focus:border-emerald-500"
                   />
                   <button
                     type="button"
                     onClick={() => handleCountChange(denom, count + 1)}
-                    className="w-7 h-7 rounded-lg bg-amber-500 hover:bg-amber-600 font-bold text-amber-950 flex items-center justify-center cursor-pointer text-sm"
+                    className="w-7 h-7 rounded-lg bg-emerald-500 hover:bg-emerald-600 font-bold text-emerald-950 flex items-center justify-center cursor-pointer text-sm"
                   >
                     +
                   </button>

@@ -22,16 +22,15 @@ const LM_STUDIO_MODEL = process.env.LM_STUDIO_MODEL || 'google/gemma-4-e2b';
 function getLMStudioClient(): OpenAI {
   return new OpenAI({
     baseURL: LM_STUDIO_BASE_URL,
-    apiKey: 'lm-studio', // LM Studio does not require a real API key
+    apiKey: 'lm-studio',
   });
 }
 
-// Health check endpoint
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API Route: Analyze raw vendor notes into structured ledger
 app.post('/api/analyze-ledger', async (req, res) => {
   try {
     const { notes, currency = 'GHS', vendorName = 'Vendor', businessType = 'Market Stall', stockProducts = [] } = req.body;
@@ -660,7 +659,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[Market Vendor Daily Ledger] Express server running on http://0.0.0.0:${PORT}`);
+    console.log(`[Sika Dwa] Express server running on http://0.0.0.0:${PORT}`);
     console.log(`[LM Studio] Connecting to: ${LM_STUDIO_BASE_URL} | Model: ${LM_STUDIO_MODEL}`);
   });
 }
